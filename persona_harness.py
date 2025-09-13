@@ -19,7 +19,7 @@ class PersonaHarness:
             base_url=base_url,
             api_key="ollama",
             max_retries=3,
-            timeout=60.0
+            timeout=600.0  # 10 minutes for Ollama
         )
         self.model_name = model_name
         self.results_dir = Path("results")
