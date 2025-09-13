@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Quick pilot test with 2 personas and 2 questions.
+Concurrent persona testing with all personas and questions.
 """
 
+import asyncio
 from pathlib import Path
 from persona_harness import PersonaHarness
 
@@ -30,29 +31,39 @@ def load_questions(questions_file: str) -> list:
 
     return questions
 
-def run_pilot(persona_files: list, questions_file: str):
-    """Run pilot test with specified persona files and questions."""
+async def run_concurrent_test(persona_files: list, questions_file: str):
+    """Run concurrent test with all personas and questions."""
     harness = PersonaHarness()
     questions = load_questions(questions_file)
 
+    # Load all persona data
+    personas_data = []
     for persona_file in persona_files:
         persona_name = Path(persona_file).stem
         persona_context = load_persona(persona_file)
+        personas_data.append({
+            "name": persona_name,
+            "context": persona_context
+        })
 
-        print(f"\nTesting {persona_name}...")
-        results = harness.test_persona(
-            persona_name=persona_name,
-            persona_context=persona_context,
-            questions=questions
-        )
-        print(f"Completed {len(results)} questions")
+    # Run all personas and questions concurrently
+    summary = await harness.test_all_personas_concurrent(personas_data, questions)
+    return summary
 
 def main():
-    """Run pilot test with 2 personas and 2 questions."""
-    run_pilot(
-        persona_files=["startup_cto.md", "phd_student.md"],
-        questions_file="questions.md"
-    )
+    """Run concurrent test with all personas and all questions."""
+    persona_files = [
+        "startup_cto.md",
+        "phd_student.md",
+        "consulting_analyst.md",
+        "ml_engineer.md",
+        "data_scientist.md",
+        "product_engineer.md"
+    ]
+
+    print("Starting concurrent persona testing...")
+    summary = asyncio.run(run_concurrent_test(persona_files, "questions.md"))
+    print(f"Testing complete! Check results/ directory for output files.")
 
 if __name__ == "__main__":
     main()
