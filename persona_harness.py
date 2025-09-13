@@ -13,7 +13,7 @@ from openai import AsyncOpenAI
 
 
 class PersonaHarness:
-    def __init__(self, model_name: str = "gpt-oss:latest", base_url: str = "http://localhost:11434/v1"):
+    def __init__(self, model_name: str = "qwen3-coder", base_url: str = "http://localhost:11434/v1"):
         """Initialize with Ollama configuration."""
         self.client = AsyncOpenAI(
             base_url=base_url,
@@ -104,71 +104,49 @@ Respond to questions from this persona's perspective. Be authentic to this role.
         print(f"Session saved: {session_filename} ({len(successful_results)}/{len(questions)} successful)")
         return results
 
-    async def test_all_personas_concurrent(self, personas_data: List[Dict], questions: List[Dict[str, str]]) -> Dict:
-        """Test all personas concurrently - maximum speed approach."""
-        print(f"Starting fully concurrent testing: {len(personas_data)} personas × {len(questions)} questions = {len(personas_data) * len(questions)} total requests")
+    async def test_all_personas_sequential(self, personas_data: List[Dict], questions: List[Dict[str, str]]) -> Dict:
+        """Test personas one at a time for mental continuity, with concurrent questions per persona."""
+        total_requests = len(personas_data) * len(questions)
+        print(f"Starting sequential persona testing: {len(personas_data)} personas × {len(questions)} questions = {total_requests} total requests")
+        print(f"Processing one persona at a time for mental continuity")
 
-        all_tasks = []
-        for persona_data in personas_data:
-            for question in questions:
-                task = self._ask_question(
-                    persona_data["name"],
-                    persona_data["context"],
-                    question
-                )
-                all_tasks.append(task)
-
-        # Execute ALL requests concurrently
         start_time = datetime.now()
-        all_results = await asyncio.gather(*all_tasks)
+        persona_results = {}
+
+        for i, persona_data in enumerate(personas_data, 1):
+            persona_name = persona_data["name"]
+            print(f"\n=== Processing Persona {i}/{len(personas_data)}: {persona_name} ===")
+
+            # Run all questions for this persona concurrently
+            results = await self.test_persona(
+                persona_name=persona_name,
+                persona_context=persona_data["context"],
+                questions=questions
+            )
+
+            persona_results[persona_name] = results
+            successful_count = sum(1 for r in results if "error" not in r)
+            print(f"✓ {persona_name} complete: {successful_count}/{len(questions)} successful")
+
         end_time = datetime.now()
 
-        # Group results by persona
-        persona_results = {}
-        for result in all_results:
-            persona_name = result["persona_name"]
-            if persona_name not in persona_results:
-                persona_results[persona_name] = []
-            persona_results[persona_name].append(result)
-
-        # Save individual session files for each persona
-        session_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        for persona_name, results in persona_results.items():
-            successful_results = [r for r in results if "error" not in r]
-
-            session_filename = f"{persona_name}_session_{session_timestamp}.json"
-            session_filepath = self.results_dir / "raw_responses" / session_filename
-
-            session_data = {
-                "persona_name": persona_name,
-                "session_timestamp": session_timestamp,
-                "model": self.model_name,
-                "total_questions": len(questions),
-                "successful_responses": len(successful_results),
-                "responses": results
-            }
-
-            with open(session_filepath, 'w') as f:
-                json.dump(session_data, f, indent=2)
-
-            print(f"Session saved: {session_filename} ({len(successful_results)}/{len(questions)} successful)")
-
+        # Calculate summary statistics
         duration = end_time - start_time
+        all_results = [result for results in persona_results.values() for result in results]
         total_successful = sum(len([r for r in results if "error" not in r]) for results in persona_results.values())
 
         summary = {
             "total_requests": len(all_results),
             "successful_requests": total_successful,
             "duration_seconds": duration.total_seconds(),
-            "requests_per_second": len(all_results) / duration.total_seconds(),
             "personas_tested": len(persona_results),
             "questions_per_persona": len(questions)
         }
 
-        print(f"\n=== CONCURRENT TESTING COMPLETE ===")
+        print(f"\n=== SEQUENTIAL PERSONA TESTING COMPLETE ===")
         print(f"Total requests: {summary['total_requests']}")
         print(f"Successful: {summary['successful_requests']}")
         print(f"Duration: {summary['duration_seconds']:.2f} seconds")
-        print(f"Speed: {summary['requests_per_second']:.2f} requests/second")
+        print(f"Speed: {summary['successful_requests'] / summary['duration_seconds']:.2f} successful/second")
 
         return summary

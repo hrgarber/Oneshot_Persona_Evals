@@ -31,8 +31,8 @@ def load_questions(questions_file: str) -> list:
 
     return questions
 
-async def run_concurrent_test(persona_files: list, questions_file: str):
-    """Run concurrent test with all personas and questions."""
+async def run_sequential_test(persona_files: list, questions_file: str):
+    """Run test processing one persona at a time for mental continuity."""
     harness = PersonaHarness()
     questions = load_questions(questions_file)
 
@@ -46,8 +46,8 @@ async def run_concurrent_test(persona_files: list, questions_file: str):
             "context": persona_context
         })
 
-    # Run all personas and questions concurrently
-    summary = await harness.test_all_personas_concurrent(personas_data, questions)
+    # Run personas sequentially (one at a time) for mental continuity
+    summary = await harness.test_all_personas_sequential(personas_data, questions)
     return summary
 
 def main():
@@ -61,8 +61,9 @@ def main():
         "product_engineer.md"
     ]
 
-    print("Starting concurrent persona testing...")
-    summary = asyncio.run(run_concurrent_test(persona_files, "questions.md"))
+    print("Starting sequential persona testing for mental continuity...")
+    # Process one persona at a time (all their questions concurrently)
+    summary = asyncio.run(run_sequential_test(persona_files, "questions.md"))
     print(f"Testing complete! Check results/ directory for output files.")
 
 if __name__ == "__main__":
