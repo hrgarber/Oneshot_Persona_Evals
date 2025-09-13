@@ -14,8 +14,9 @@ ENV/
 # UV
 .uv_cache/
 
-# Results directory (generated during tests)
-results/
+# Results directory - ignore raw responses but keep analysis
+results/raw_responses/
+results/metadata/
 
 # IDE
 .vscode/
