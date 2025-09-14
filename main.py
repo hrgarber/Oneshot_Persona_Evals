@@ -33,7 +33,13 @@ def load_questions(questions_file: str) -> list:
 
 async def run_sequential_test(persona_files: list, questions_file: str):
     """Run test processing one persona at a time for mental continuity."""
-    harness = PersonaHarness()
+    # Initialize with OpenAI fallback (set your API key in environment or .env file)
+    import os
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    harness = PersonaHarness(
+        openai_api_key=openai_api_key,
+        openai_model="gpt-4o-2024-08-06"  # Using available model instead of gpt-5
+    )
     questions = load_questions(questions_file)
 
     # Load all persona data

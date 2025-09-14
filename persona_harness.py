@@ -7,21 +7,37 @@ import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from openai import AsyncOpenAI
 
 
 class PersonaHarness:
-    def __init__(self, model_name: str = "qwen3-coder", base_url: str = "http://localhost:11434/v1"):
-        """Initialize with Ollama configuration."""
+    def __init__(self, 
+                 model_name: str = "qwen3-coder", 
+                 base_url: str = "http://localhost:11434/v1",
+                 openai_api_key: Optional[str] = None,
+                 openai_model: str = "gpt-4o-2024-08-06"):
+        """Initialize with Ollama configuration and OpenAI fallback."""
+        # Primary client (Ollama)
         self.client = AsyncOpenAI(
             base_url=base_url,
             api_key="ollama",
-            max_retries=3,
-            timeout=600.0  # 10 minutes for Ollama
+            max_retries=2,
+            timeout=300.0  # 5 minutes for Ollama
         )
         self.model_name = model_name
+        
+        # Fallback client (OpenAI)
+        self.openai_client = None
+        self.openai_model = openai_model
+        if openai_api_key:
+            self.openai_client = AsyncOpenAI(
+                api_key=openai_api_key,
+                max_retries=3,
+                timeout=120.0  # 2 minutes for OpenAI
+            )
+        
         self.results_dir = Path("results")
         self._setup_directories()
 
@@ -30,20 +46,23 @@ class PersonaHarness:
         (self.results_dir / "raw_responses").mkdir(parents=True, exist_ok=True)
 
     async def _ask_question(self, persona_name: str, persona_context: str, question: Dict[str, str]) -> Dict:
-        """Ask a single question to a persona asynchronously."""
+        """Ask a single question to a persona asynchronously with OpenAI fallback."""
         system_prompt = f"""You are roleplaying as: {persona_name}
 
 {persona_context}
 
 Respond to questions from this persona's perspective. Be authentic to this role."""
 
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": question["text"]}
+        ]
+
+        # Try Ollama first
         try:
             response = await self.client.chat.completions.create(
                 model=self.model_name,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": question["text"]}
-                ],
+                messages=messages,
                 temperature=0.1
             )
 
@@ -53,20 +72,60 @@ Respond to questions from this persona's perspective. Be authentic to this role.
                 "question_text": question["text"],
                 "response": response.choices[0].message.content,
                 "timestamp": datetime.now().isoformat(),
-                "model": self.model_name
+                "model": self.model_name,
+                "provider": "ollama"
             }
 
-            print(f"Completed: {persona_name} - {question['id']}")
+            print(f"✓ Ollama: {persona_name} - {question['id']}")
             return result
 
-        except Exception as e:
-            print(f"Error with {persona_name} - {question['id']}: {e}")
-            return {
-                "persona_name": persona_name,
-                "question_id": question["id"],
-                "error": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
+        except Exception as ollama_error:
+            print(f"⚠ Ollama failed for {persona_name} - {question['id']}: {ollama_error}")
+            
+            # Try OpenAI fallback if available
+            if self.openai_client:
+                try:
+                    print(f"🔄 Trying OpenAI fallback for {persona_name} - {question['id']}")
+                    response = await self.openai_client.chat.completions.create(
+                        model=self.openai_model,
+                        messages=messages,
+                        temperature=0.1
+                    )
+
+                    result = {
+                        "persona_name": persona_name,
+                        "question_id": question["id"],
+                        "question_text": question["text"],
+                        "response": response.choices[0].message.content,
+                        "timestamp": datetime.now().isoformat(),
+                        "model": self.openai_model,
+                        "provider": "openai",
+                        "fallback_reason": str(ollama_error)
+                    }
+
+                    print(f"✓ OpenAI: {persona_name} - {question['id']}")
+                    return result
+
+                except Exception as openai_error:
+                    print(f"❌ Both providers failed for {persona_name} - {question['id']}")
+                    return {
+                        "persona_name": persona_name,
+                        "question_id": question["id"],
+                        "question_text": question["text"],
+                        "error": f"Ollama: {ollama_error}; OpenAI: {openai_error}",
+                        "timestamp": datetime.now().isoformat(),
+                        "provider": "failed"
+                    }
+            else:
+                print(f"❌ No fallback available for {persona_name} - {question['id']}")
+                return {
+                    "persona_name": persona_name,
+                    "question_id": question["id"],
+                    "question_text": question["text"],
+                    "error": f"Ollama failed: {ollama_error}; No OpenAI fallback configured",
+                    "timestamp": datetime.now().isoformat(),
+                    "provider": "failed"
+                }
 
     async def test_persona(self, persona_name: str, persona_context: str, questions: List[Dict[str, str]]) -> List[Dict]:
         """Test a persona against a list of questions concurrently."""

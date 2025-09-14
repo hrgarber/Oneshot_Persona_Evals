@@ -1,0 +1,22 @@
+[
+  {
+    "id": "behavioral_analysis_v1",
+    "name": "Behavioral Analysis Questionnaire v1",
+    "description": "Core behavioral analysis questions testing decision-making patterns, risk tolerance, time orientation, and success definitions across different AI personas.",
+    "questions": [
+      "q01_requirements_uncertainty",
+      "q02_time_quality_tradeoff",
+      "q03_success_definition",
+      "q04_scope_boundaries",
+      "q05_quality_tradeoffs",
+      "q06_risk_tolerance",
+      "q07_time_orientation",
+      "q08_success_definition_detailed",
+      "q09_approach_intent",
+      "q10_exclusion_intent",
+      "q11_validation_intent"
+    ],
+    "created_at": "2025-09-14T03:45:00Z",
+    "updated_at": "2025-09-14T03:45:00Z"
+  }
+]
