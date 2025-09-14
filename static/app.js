@@ -90,6 +90,28 @@ class PersonaEvalApp {
     async loadQuestionnaires() {
         const response = await fetch('/api/questionnaires');
         this.questionnaires = await response.json();
+
+        // Load and map question texts for each questionnaire
+        await this.resolveQuestionTexts();
+    }
+
+    async resolveQuestionTexts() {
+        // Create question lookup map
+        const questionMap = {};
+        this.questions.forEach(q => {
+            questionMap[q.id] = q.text || q.question || 'Unnamed question';
+        });
+
+        // Resolve question texts for each questionnaire
+        this.questionnaires.forEach(questionnaire => {
+            questionnaire.question_details = (questionnaire.questions || []).map(qid => {
+                const question = this.questions.find(q => q.id === qid);
+                return {
+                    id: qid,
+                    question: question ? (question.text || question.question) : `Question ${qid} not found`
+                };
+            });
+        });
     }
 
     async loadExperimentHistory() {
@@ -282,7 +304,7 @@ class PersonaEvalApp {
         this.currentEditingPersona = persona;
         const modal = document.getElementById('persona-modal');
         const title = document.getElementById('persona-modal-title');
-        
+
         if (persona) {
             title.textContent = 'Edit Persona';
             document.getElementById('persona-name').value = persona.name;
@@ -292,12 +314,15 @@ class PersonaEvalApp {
             title.textContent = 'Add New Persona';
             document.getElementById('persona-form').reset();
         }
-        
+
         modal.style.display = 'block';
+        modal.classList.add('active');
     }
 
     hidePersonaModal() {
-        document.getElementById('persona-modal').style.display = 'none';
+        const modal = document.getElementById('persona-modal');
+        modal.style.display = 'none';
+        modal.classList.remove('active');
         this.currentEditingPersona = null;
     }
 
@@ -376,17 +401,20 @@ class PersonaEvalApp {
         this.currentEditingQuestionnaire = questionnaire;
         const modal = document.getElementById('questionnaire-modal');
         const title = document.getElementById('questionnaire-modal-title');
-        
-        // Render questions checkboxes
+
+        // Render questions checkboxes with actual question text
         const questionsContainer = document.getElementById('questionnaire-questions');
-        questionsContainer.innerHTML = this.questions.map(question => `
-            <label class="checkbox-label">
-                <input type="checkbox" value="${question.id}" 
-                    ${questionnaire && questionnaire.questions.includes(question.id) ? 'checked' : ''}>
-                ${question.question}
-            </label>
-        `).join('');
-        
+        questionsContainer.innerHTML = this.questions.map(question => {
+            const questionText = question.text || question.question || 'Unnamed question';
+            return `
+                <label class="checkbox-label">
+                    <input type="checkbox" value="${question.id}"
+                        ${questionnaire && questionnaire.questions.includes(question.id) ? 'checked' : ''}>
+                    ${questionText}
+                </label>
+            `;
+        }).join('');
+
         if (questionnaire) {
             title.textContent = 'Edit Questionnaire';
             document.getElementById('questionnaire-name').value = questionnaire.name;
@@ -395,12 +423,15 @@ class PersonaEvalApp {
             title.textContent = 'Add New Questionnaire';
             document.getElementById('questionnaire-form').reset();
         }
-        
+
         modal.style.display = 'block';
+        modal.classList.add('active');
     }
 
     hideQuestionnaireModal() {
-        document.getElementById('questionnaire-modal').style.display = 'none';
+        const modal = document.getElementById('questionnaire-modal');
+        modal.style.display = 'none';
+        modal.classList.remove('active');
         this.currentEditingQuestionnaire = null;
     }
 
@@ -629,7 +660,7 @@ class PersonaEvalApp {
     updateApiKeyStatus(data) {
         const statusElement = document.getElementById('api-key-status');
         const keyInput = document.getElementById('openai-api-key');
-        
+
         if (data.configured) {
             statusElement.textContent = 'Configured ✓';
             statusElement.className = 'status-indicator configured';
@@ -640,9 +671,47 @@ class PersonaEvalApp {
             keyInput.placeholder = 'Enter your OpenAI API key';
         }
     }
+
+    // Question modal methods (for completeness)
+    showQuestionModal(question = null) {
+        this.currentEditingQuestion = question;
+        const modal = document.getElementById('question-modal');
+        const title = document.getElementById('question-modal-title');
+
+        if (question) {
+            title.textContent = 'Edit Question';
+            document.getElementById('question-text').value = question.text || question.question || '';
+        } else {
+            title.textContent = 'Add New Question';
+            document.getElementById('question-form').reset();
+        }
+
+        modal.style.display = 'block';
+        modal.classList.add('active');
+    }
+
+    hideQuestionModal() {
+        const modal = document.getElementById('question-modal');
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+        this.currentEditingQuestion = null;
+    }
 }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Hide all modals on page load to fix stacking issue
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    });
+
+    // Initialize the app
     window.app = new PersonaEvalApp();
+
+    // Show the default tab (Run Experiment)
+    const defaultTab = document.querySelector('.tab-btn[data-tab="run-experiment"]');
+    if (defaultTab) {
+        defaultTab.click();
+    }
 });
