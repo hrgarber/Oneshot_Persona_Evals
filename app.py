@@ -395,13 +395,48 @@ def update_questionnaire(questionnaire_id):
 def delete_questionnaire(questionnaire_id):
     """Delete a questionnaire."""
     questionnaires = load_questionnaires()
-    
+
     # Find and remove questionnaire
     questionnaires = [q for q in questionnaires if q['id'] != questionnaire_id]
-    
+
     save_questionnaires(questionnaires)
-    
+
     return jsonify({"message": "Questionnaire deleted successfully"})
+
+@app.route('/api/questionnaires/<questionnaire_id>/full', methods=['GET'])
+def get_questionnaire_with_questions(questionnaire_id):
+    """Return questionnaire with resolved question texts."""
+    try:
+        questionnaires = load_questionnaires()
+        questions = load_questions()
+
+        # Create question lookup map
+        question_map = {q['id']: q for q in questions}
+
+        # Find questionnaire and resolve questions
+        questionnaire = next((q for q in questionnaires if q['id'] == questionnaire_id), None)
+        if not questionnaire:
+            return jsonify({"error": "Questionnaire not found"}), 404
+
+        # Resolve question IDs to full question objects
+        resolved_questions = []
+        for qid in questionnaire.get('questions', []):
+            if qid in question_map:
+                resolved_questions.append(question_map[qid])
+            else:
+                resolved_questions.append({
+                    'id': qid,
+                    'text': f'Question {qid} not found',
+                    'question': f'Question {qid} not found'
+                })
+
+        # Return questionnaire with resolved questions
+        result = dict(questionnaire)
+        result['resolved_questions'] = resolved_questions
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/experiments')
 def get_experiments():

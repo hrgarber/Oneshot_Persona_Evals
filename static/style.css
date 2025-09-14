@@ -428,6 +428,7 @@ section h2 {
 
 /* Modal */
 .modal {
+    display: none; /* Hide by default - FIX for modal stacking issue */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -435,6 +436,10 @@ section h2 {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.5);
+}
+
+.modal.active {
+    display: block; /* Show when active class is added */
 }
 
 .modal-content {
