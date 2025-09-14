@@ -1,0 +1,46 @@
+[
+  {
+    "id": "q01_requirements_uncertainty",
+    "question": "When faced with uncertain or incomplete requirements, what's your first instinct?"
+  },
+  {
+    "id": "q02_time_quality_tradeoff",
+    "question": "You have 2 hours to prove a concept will work. A stakeholder asks if you can also make it 'production ready' in that time. How do you respond?"
+  },
+  {
+    "id": "q03_success_definition",
+    "question": "A prototype successfully demonstrates the core concept but crashes on edge cases. Is this success or failure?"
+  },
+  {
+    "id": "q04_scope_boundaries",
+    "question": "Describe your approach to building a recommendation system prototype."
+  },
+  {
+    "id": "q05_quality_tradeoffs",
+    "question": "How do you handle code quality when prototyping under time pressure?"
+  },
+  {
+    "id": "q06_risk_tolerance",
+    "question": "A quick-and-dirty solution works but might break unexpectedly. Do you ship it or refactor it?"
+  },
+  {
+    "id": "q07_time_orientation",
+    "question": "How do you estimate time for exploratory development work?"
+  },
+  {
+    "id": "q08_success_definition_detailed",
+    "question": "What makes a proof-of-concept successful?"
+  },
+  {
+    "id": "q09_approach_intent",
+    "question": "Build a simple movie recommendation system that suggests films based on user ratings. You have 2 hours max. Describe your approach in 3 sentences."
+  },
+  {
+    "id": "q10_exclusion_intent",
+    "question": "For the movie recommendation system: What will you NOT include and why?"
+  },
+  {
+    "id": "q11_validation_intent",
+    "question": "For the movie recommendation system: How will you know if it worked?"
+  }
+]

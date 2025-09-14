@@ -1,32 +1,66 @@
-# Persona Experiment
+# Persona Evaluation Research Tool
 
-Research experiment to study behavioral differences between AI coding assistant personas using Ollama local models.
+A comprehensive research tool for studying behavioral differences between AI coding assistant personas, featuring both command-line batch processing and a web-based interface for interactive experimentation.
 
 ## Overview
 
-Tests 6 different personas (startup CTO, PhD student, consulting analyst, ML engineer, data scientist, product engineer) against 11 behavioral questions to understand how different professional contexts influence AI responses.
+This tool tests 6 different professional personas (startup CTO, PhD student, consulting analyst, ML engineer, data scientist, product engineer) against behavioral questions to understand how different professional contexts influence AI responses.
 
-## Setup
+## Features
+
+- **Web Interface**: Interactive GUI for managing personas, questionnaires, and experiments
+- **Batch Processing**: Command-line tool for running complete experiments
+- **CRUD Operations**: Full create, read, update, delete functionality for all entities
+- **API Key Management**: Support for both Ollama (local) and OpenAI models
+- **Real-time Results**: Live experiment monitoring and results display
+- **Clean Server Management**: Proper startup/shutdown lifecycle with signal handling
+
+## Quick Start
+
+### Web Interface (Recommended)
 
 ```bash
 # Install dependencies
 uv sync
 
-# Ensure Ollama is running with qwen3-coder model
-ollama pull qwen3-coder
-ollama serve
+# Start the web interface
+uv run python app.py
 ```
 
-## Usage
+Access the interface at: http://localhost:9000
+
+The server includes:
+- Clean startup/shutdown with signal handling (SIGINT, SIGTERM)
+- Automatic port conflict resolution
+- Background process management
+- Real-time logging to server.log
+
+### Command Line Usage
 
 ```bash
+# Ensure Ollama is running with qwen3-coder model (optional)
+ollama pull qwen3-coder
+ollama serve
+
 # Run complete experiment with all personas and questions
-uv run main.py
+uv run python main.py
 ```
+
+## Web Interface Features
+
+The web interface provides:
+
+- **Persona Management**: Create, edit, and delete persona profiles
+- **Questionnaire Builder**: Design custom questionnaires with multiple questions
+- **Question Library**: Manage individual questions and reuse across questionnaires
+- **Experiment Runner**: Execute experiments with real-time progress monitoring
+- **Results Viewer**: Browse and analyze experiment results
+- **API Configuration**: Set up OpenAI or Ollama model endpoints
+- **Environment Management**: Edit .env files directly through the interface
 
 **Processing Approach:**
 - One persona at a time for mental continuity
-- All 11 questions per persona run concurrently for efficiency
+- All questions per persona run concurrently for efficiency
 - Results saved as individual session files per persona
 
 ## Folder Structure

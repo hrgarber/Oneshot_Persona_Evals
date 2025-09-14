@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persona Evaluation Research Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 Persona Evaluation Research Tool</h1>
+            <p>Scientific analysis of AI persona behavior and consistency</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="experiment">Run Experiment</button>
+            <button class="tab-btn" data-tab="personas">Manage Personas</button>
+            <button class="tab-btn" data-tab="questionnaires">Manage Questionnaires</button>
+            <button class="tab-btn" data-tab="history">Experiment History</button>
+        </nav>
+
+        <div class="main-content">
+            <!-- Experiment Tab -->
+            <section id="experiment-tab" class="tab-content active">
+                <h2>Run Experiment</h2>
+                
+                <div class="setup-grid">
+                    <div class="setup-column">
+                        <h3>Select Personas</h3>
+                        <div id="persona-list" class="checkbox-list">
+                            <!-- Personas loaded dynamically -->
+                        </div>
+                        <button id="select-all-personas" class="btn-secondary">Select All</button>
+                    </div>
+                    
+                    <div class="setup-column">
+                        <h3>Select Questionnaire</h3>
+                        <div id="questionnaire-list" class="radio-list">
+                            <!-- Questionnaires loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="experiment-controls">
+                    <div class="api-key-section">
+                        <label for="openai-api-key">OpenAI API Key:</label>
+                        <div class="api-key-input-group">
+                            <input type="password" id="openai-api-key" placeholder="Enter your OpenAI API key">
+                            <button id="save-api-key" class="btn-secondary">Save</button>
+                            <span id="api-key-status" class="status-indicator"></span>
+                        </div>
+                    </div>
+                    
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="use-openai-fallback" checked>
+                        Use OpenAI fallback if Ollama fails
+                    </label>
+                    
+                    <button id="start-experiment" class="btn-primary">Start Experiment</button>
+                    <button id="stop-experiment" class="btn-danger" style="display: none;">Stop Experiment</button>
+                </div>
+            </section>
+
+            <!-- Persona Management Tab -->
+            <section id="personas-tab" class="tab-content">
+                <h2>Manage Personas</h2>
+                
+                <div class="management-controls">
+                    <button id="add-persona" class="btn-primary">Add New Persona</button>
+                </div>
+                
+                <div id="personas-management" class="management-list">
+                    <!-- Personas management loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Questionnaire Management Tab -->
+            <section id="questionnaires-tab" class="tab-content">
+                <h2>Manage Questionnaires</h2>
+                
+                <div class="management-controls">
+                    <button id="add-questionnaire" class="btn-primary">Add New Questionnaire</button>
+                </div>
+                
+                <div id="questionnaires-management" class="management-list">
+                    <!-- Questionnaires management loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- History Tab -->
+            <section id="history-tab" class="tab-content">
+                <h2>Experiment History</h2>
+                <div id="experiment-history">
+                    <!-- History loaded dynamically -->
+                </div>
+            </section>
+
+            <!-- Experiment Progress -->
+            <section class="progress-section" id="progress-section" style="display: none;">
+                <h2>Experiment Progress</h2>
+                
+                <div class="progress-info">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Ready to start...</div>
+                </div>
+                
+                <div class="persona-progress" id="persona-progress">
+                    <!-- Progress updates appear here -->
+                </div>
+            </section>
+
+            <!-- Results Display -->
+            <section class="results-section" id="results-section" style="display: none;">
+                <h2>Experiment Results</h2>
+                
+                <div class="results-controls">
+                    <button id="export-results" class="btn-secondary">Export Results</button>
+                    <button id="compare-personas" class="btn-secondary">Compare Personas</button>
+                    <button id="analyze-consistency" class="btn-secondary">Analyze Consistency</button>
+                </div>
+                
+                <div class="results-grid" id="results-grid">
+                    <!-- Results appear here -->
+                </div>
+            </section>
+
+            <!-- Experiment History -->
+            <section class="history-section">
+                <h2>Experiment History</h2>
+                
+                <div class="history-list" id="history-list">
+                    <!-- Previous experiments loaded here -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal for detailed results -->
+    <div id="results-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body">
+                <!-- Detailed results content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Dialogs -->
+    <!-- Persona Edit Modal -->
+    <div id="persona-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="persona-modal-title">Add New Persona</h3>
+                <span class="close" id="persona-modal-close">&times;</span>
+            </div>
+            <form id="persona-form">
+                <div class="form-group">
+                    <label for="persona-name">Name:</label>
+                    <input type="text" id="persona-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="persona-description">Description:</label>
+                    <textarea id="persona-description" rows="6" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="persona-behavioral-profile">Behavioral Profile:</label>
+                    <input type="text" id="persona-behavioral-profile">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" id="persona-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Questionnaire Edit Modal -->
+    <div id="questionnaire-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="questionnaire-modal-title">Add New Questionnaire</h3>
+                <span class="close" id="questionnaire-modal-close">&times;</span>
+            </div>
+            <form id="questionnaire-form">
+                <div class="form-group">
+                    <label for="questionnaire-name">Name:</label>
+                    <input type="text" id="questionnaire-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="questionnaire-description">Description:</label>
+                    <textarea id="questionnaire-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Questions:</label>
+                    <div id="questionnaire-questions" class="checkbox-list">
+                        <!-- Questions loaded dynamically -->
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" id="questionnaire-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Question Edit Modal -->
+    <div id="question-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="question-modal-title">Add New Question</h3>
+                <span class="close" id="question-modal-close">&times;</span>
+            </div>
+            <form id="question-form">
+                <div class="form-group">
+                    <label for="question-text">Question:</label>
+                    <textarea id="question-text" rows="4" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Save</button>
+                    <button type="button" class="btn-secondary" id="question-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
