@@ -114,12 +114,8 @@ export function ExperimentRunner() {
     setPollingInterval(interval);
   };
 
-  const handlePersonaToggle = (id: string) => {
-    setSelectedPersonas(prev =>
-      prev.includes(id)
-        ? prev.filter(p => p !== id)
-        : [...prev, id]
-    );
+  const handlePersonaSelectionChange = (selectedIds: string[]) => {
+    setSelectedPersonas(selectedIds);
   };
 
   const handleRun = async (config: any) => {
@@ -189,7 +185,7 @@ export function ExperimentRunner() {
           <PersonaGrid
             personas={personas}
             selectedPersonas={selectedPersonas}
-            onPersonaToggle={handlePersonaToggle}
+            onSelectionChange={handlePersonaSelectionChange}
             disabled={running}
           />
         </CardContent>

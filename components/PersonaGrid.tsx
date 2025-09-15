@@ -21,6 +21,7 @@ interface PersonaGridProps {
   }>;
   selectedPersonas: string[];
   onSelectionChange: (selectedIds: string[]) => void;
+  disabled?: boolean;
 }
 
 // HACK: Hardcoded combinations for validation - would need configurable presets in production
@@ -62,7 +63,7 @@ const RECOMMENDED_COMBINATIONS = [
   }
 ];
 
-export function PersonaGrid({ personas, selectedPersonas, onSelectionChange }: PersonaGridProps) {
+export function PersonaGrid({ personas, selectedPersonas, onSelectionChange, disabled = false }: PersonaGridProps) {
   const totalPersonas = personas.length;
   const selectedCount = selectedPersonas.length;
   const selectionProgress = totalPersonas > 0 ? (selectedCount / totalPersonas) * 100 : 0;
@@ -114,7 +115,7 @@ export function PersonaGrid({ personas, selectedPersonas, onSelectionChange }: P
             variant="outline"
             size="sm"
             onClick={handleSelectAll}
-            disabled={selectedCount === totalPersonas}
+            disabled={disabled || selectedCount === totalPersonas}
             className="text-xs"
           >
             Select All
@@ -123,7 +124,7 @@ export function PersonaGrid({ personas, selectedPersonas, onSelectionChange }: P
             variant="outline"
             size="sm"
             onClick={handleClearAll}
-            disabled={selectedCount === 0}
+            disabled={disabled || selectedCount === 0}
             className="text-xs"
           >
             Clear All
@@ -180,6 +181,7 @@ export function PersonaGrid({ personas, selectedPersonas, onSelectionChange }: P
               persona={persona}
               selected={selectedPersonas.includes(persona.id)}
               onSelect={handlePersonaSelect}
+              disabled={disabled}
             />
           </div>
         ))}
