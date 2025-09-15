@@ -1,0 +1,95 @@
+{
+  "id": "exp_test_behavioral_analysis",
+  "timestamp": "2025-09-15T03:45:00.000Z",
+  "status": "completed",
+  "personas": [
+    {
+      "id": "startup_founder",
+      "name": "Startup Founder"
+    },
+    {
+      "id": "enterprise_architect",
+      "name": "Enterprise Architect"
+    },
+    {
+      "id": "research_student",
+      "name": "Research Student"
+    }
+  ],
+  "questionnaire": {
+    "id": "behavioral_test",
+    "name": "Behavioral Analysis Test"
+  },
+  "questions": [
+    {
+      "id": "q01_approach",
+      "question": "How would you approach building a recommendation system?",
+      "text": "How would you approach building a recommendation system?",
+      "category": "methodology"
+    },
+    {
+      "id": "q02_time_pressure",
+      "question": "You have 2 hours to prove a concept. What do you build?",
+      "text": "You have 2 hours to prove a concept. What do you build?",
+      "category": "time_management"
+    }
+  ],
+  "total_responses": 6,
+  "successful_responses": 6,
+  "results": [
+    {
+      "persona_name": "Startup Founder",
+      "persona_id": "startup_founder",
+      "question_id": "q01_approach",
+      "question_text": "How would you approach building a recommendation system?",
+      "response": "Look, we need to ship an MVP fast and validate our hypothesis with real users. I'd build the absolute minimum - maybe just collaborative filtering with basic cosine similarity. Good enough to prove the concept, ship it in 2 weeks, get user feedback, and iterate quickly. Every day we spend perfecting the algorithm is a day we're not learning from actual user behavior. Failed fast, learn fast, pivot if needed.",
+      "timestamp": "2025-09-15T03:45:01.000Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "persona_name": "Enterprise Architect",
+      "persona_id": "enterprise_architect",
+      "question_id": "q01_approach",
+      "question_text": "How would you approach building a recommendation system?",
+      "response": "We need a comprehensive solution that addresses scalability, maintainability, and enterprise requirements from day one. I'd design a robust architecture with proper microservices, implement thorough testing coverage, establish monitoring and observability, ensure compliance with data governance policies. The recommendation engine should support multiple algorithms, A/B testing framework, real-time and batch processing, with proper documentation and code reviews. This is a long-term investment in our technical infrastructure.",
+      "timestamp": "2025-09-15T03:45:02.000Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "persona_name": "Research Student",
+      "persona_id": "research_student",
+      "question_id": "q01_approach",
+      "question_text": "How would you approach building a recommendation system?",
+      "response": "This is a fascinating research opportunity! I'd start by experimenting with different approaches - collaborative filtering, content-based, hybrid models, maybe try some deep learning techniques. The hypothesis is that we can improve recommendation quality by 15% over baseline. I'd prototype several algorithms, run controlled experiments, gather data to validate assumptions. Need to be careful about experimental design and statistical significance. This could turn into a really interesting paper if we discover novel insights about user behavior patterns.",
+      "timestamp": "2025-09-15T03:45:03.000Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "persona_name": "Startup Founder",
+      "persona_id": "startup_founder",
+      "question_id": "q02_time_pressure",
+      "question_text": "You have 2 hours to prove a concept. What do you build?",
+      "response": "2 hours? I'm building a hardcoded demo that shows the core value prop. Maybe 20 lines of Python with some fake data that demonstrates the recommendation working. Ship it immediately, show it to users, get their reaction. Perfect is the enemy of good enough. I don't care if it breaks or has bugs - I need to validate the market hypothesis NOW before we run out of runway.",
+      "timestamp": "2025-09-15T03:45:04.000Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "persona_name": "Enterprise Architect",
+      "persona_id": "enterprise_architect",
+      "question_id": "q02_time_pressure",
+      "question_text": "You have 2 hours to prove a concept. What do you build?",
+      "response": "2 hours isn't sufficient for a production-ready proof of concept that meets our quality standards. I'd create a detailed technical specification, architecture diagram, and implementation plan that demonstrates feasibility. We need proper planning, risk assessment, and stakeholder alignment before proceeding. Rushing leads to technical debt and maintenance issues. I'd recommend extending the timeline to ensure we build something maintainable and scalable.",
+      "timestamp": "2025-09-15T03:45:05.000Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "persona_name": "Research Student",
+      "persona_id": "research_student",
+      "question_id": "q02_time_pressure",
+      "question_text": "You have 2 hours to prove a concept. What do you build?",
+      "response": "Interesting constraint! I'd quickly prototype the core algorithm to test my hypothesis about recommendation accuracy. Maybe implement a simple collaborative filtering approach, run it on a small dataset, measure precision and recall metrics. The goal is to gather preliminary data that supports or refutes the research question. Time pressure means I'd cut corners on code quality but focus on getting statistically valid results that could guide future research directions.",
+      "timestamp": "2025-09-15T03:45:06.000Z",
+      "model": "gpt-4o-mini"
+    }
+  ]
+}

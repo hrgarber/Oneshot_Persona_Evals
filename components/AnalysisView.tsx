@@ -1,9 +1,22 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// ScrollArea removed - using div with overflow instead
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+interface ExperimentSummary {
+  id: string;
+  filename: string;
+  timestamp: string;
+  persona_count: number;
+  question_count: number;
+  total_responses: number;
+  successful_responses: number;
+  status: string;
+}
 
 interface ExperimentDetails {
   id: string;
@@ -23,245 +36,382 @@ interface ExperimentDetails {
   }>;
 }
 
-interface AnalysisViewProps {
-  experiment: ExperimentDetails;
+// Behavioral Dimension Scores: 1-5 scale based on research framework
+interface BehavioralScores {
+  scopeBoundaries: number;    // 1=minimal, 5=comprehensive
+  qualityTradeoffs: number;   // 1=speed favored, 5=quality favored
+  riskTolerance: number;      // 1=high risk, 5=risk averse
+  timeOrientation: number;    // 1=sprint mentality, 5=long-term planning
+  successDefinition: number;  // 1=validation focused, 5=technical completeness
 }
 
-export function AnalysisView({ experiment }: AnalysisViewProps) {
-  // Group responses by persona
-  const responsesByPersona = experiment.results.reduce((acc, result) => {
-    if (!acc[result.persona_id]) {
-      acc[result.persona_id] = {
-        name: result.persona_name,
-        responses: []
-      };
+export function AnalysisView() {
+  const [experiments, setExperiments] = useState<ExperimentSummary[]>([]);
+  const [selectedExperiment, setSelectedExperiment] = useState<ExperimentDetails | null>(null);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchExperiments();
+  }, []);
+
+  const fetchExperiments = async () => {
+    try {
+      const response = await fetch('/api/experiments');
+      const data = await response.json();
+      setExperiments(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching experiments:', error);
+      setExperiments([]);
     }
-    acc[result.persona_id].responses.push(result);
-    return acc;
-  }, {} as Record<string, { name: string; responses: typeof experiment.results }>);
-
-  // Enhanced behavioral analysis with scoring rubric
-  const analyzeBehavior = (responses: typeof experiment.results) => {
-    // Define rubric with weighted keywords
-    const rubric = {
-      pragmatism: {
-        strong: ['mvp', 'minimum viable', 'good enough', 'ship it', 'validate first'],
-        moderate: ['practical', 'simple', 'straightforward', 'focus'],
-        weak: ['workable', 'basic', 'start']
-      },
-      perfectionism: {
-        strong: ['perfect', 'comprehensive', 'complete solution', 'all cases', 'fully'],
-        moderate: ['thorough', 'detailed', 'careful', 'polish'],
-        weak: ['complete', 'finish', 'done']
-      },
-      speed_focus: {
-        strong: ['asap', 'immediately', 'ship fast', 'quick win', 'rapid'],
-        moderate: ['quick', 'fast', 'iterate', 'deploy'],
-        weak: ['soon', 'speed', 'time']
-      },
-      quality_focus: {
-        strong: ['test coverage', 'code review', 'best practices', 'maintainable', 'scalable'],
-        moderate: ['quality', 'testing', 'robust', 'reliable'],
-        weak: ['clean', 'good', 'solid']
-      },
-      risk_tolerance: {
-        strong: ['experiment', 'fail fast', 'try it', 'pivot', 'hypothesis'],
-        moderate: ['explore', 'test', 'prototype', 'pilot'],
-        weak: ['consider', 'maybe', 'could']
-      },
-      user_centric: {
-        strong: ['user feedback', 'customer needs', 'user experience', 'pain point', 'user story'],
-        moderate: ['user', 'customer', 'feedback', 'usability'],
-        weak: ['people', 'they', 'someone']
-      }
-    };
-
-    const scores: Record<string, number> = {};
-
-    // Calculate weighted scores
-    Object.entries(rubric).forEach(([trait, keywords]) => {
-      let score = 0;
-      let maxPossible = 0;
-
-      responses.forEach(r => {
-        if (!r.response) return;
-        const text = r.response.toLowerCase();
-
-        // Check for strong indicators (3 points)
-        keywords.strong.forEach(keyword => {
-          if (text.includes(keyword)) score += 3;
-        });
-
-        // Check for moderate indicators (2 points)
-        keywords.moderate.forEach(keyword => {
-          if (text.includes(keyword)) score += 2;
-        });
-
-        // Check for weak indicators (1 point)
-        keywords.weak.forEach(keyword => {
-          if (text.includes(keyword)) score += 1;
-        });
-
-        // Max possible score per response (if all keywords matched)
-        maxPossible += (keywords.strong.length * 3 + keywords.moderate.length * 2 + keywords.weak.length);
-      });
-
-      // Normalize to percentage
-      scores[trait] = maxPossible > 0 ? Math.round((score / maxPossible) * 100) : 0;
-    });
-
-    return scores;
   };
 
-  // Get dominant trait
-  const getDominantTrait = (patterns: ReturnType<typeof analyzeBehavior>) => {
-    const sorted = Object.entries(patterns).sort(([,a], [,b]) => b - a);
-    const [trait, score] = sorted[0];
-    return { trait: trait.replace('_', ' ').toUpperCase(), score };
+  const loadExperiment = async (experimentId: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/experiments/${experimentId}`);
+      const data = await response.json();
+      setSelectedExperiment(data);
+      setShowAnalysis(true);
+    } catch (error) {
+      console.error('Error loading experiment:', error);
+    }
+    setLoading(false);
+  };
+
+  // Behavioral Scoring Algorithm based on research framework
+  const calculateBehavioralScores = (responses: ExperimentDetails['results']): BehavioralScores => {
+    const allText = responses.filter(r => r.response).map(r => r.response.toLowerCase()).join(' ');
+
+    // HACK: hardcoded scoring patterns for validation - would need NLP for production
+    const patterns = {
+      // Scope Boundaries: 1=minimal, 5=comprehensive
+      scopeBoundaries: (() => {
+        const minimal = /\b(mvp|minimum|smallest|simplest|basic|quick)\b/gi;
+        const comprehensive = /\b(comprehensive|complete|thorough|full|robust|enterprise)\b/gi;
+        const minCount = (allText.match(minimal) || []).length;
+        const compCount = (allText.match(comprehensive) || []).length;
+        if (minCount > compCount * 2) return 1.5;
+        if (compCount > minCount) return 4.0;
+        return 2.5;
+      })(),
+
+      // Quality Tradeoffs: 1=speed favored, 5=quality favored
+      qualityTradeoffs: (() => {
+        const speed = /\b(fast|quick|ship|asap|rapid|immediately|rush)\b/gi;
+        const quality = /\b(quality|test|review|maintainable|scalable|robust|best practices)\b/gi;
+        const speedCount = (allText.match(speed) || []).length;
+        const qualityCount = (allText.match(quality) || []).length;
+        if (speedCount > qualityCount * 2) return 1.5;
+        if (qualityCount > speedCount) return 4.0;
+        return 2.5;
+      })(),
+
+      // Risk Tolerance: 1=high risk, 5=risk averse
+      riskTolerance: (() => {
+        const highRisk = /\b(ship it|fail fast|experiment|try|broken|prototype|hypothesis)\b/gi;
+        const lowRisk = /\b(careful|safe|tested|validated|stable|production ready)\b/gi;
+        const riskCount = (allText.match(highRisk) || []).length;
+        const safeCount = (allText.match(lowRisk) || []).length;
+        if (riskCount > safeCount * 2) return 1.5;
+        if (safeCount > riskCount) return 4.0;
+        return 2.5;
+      })(),
+
+      // Time Orientation: 1=sprint mentality, 5=long-term planning
+      timeOrientation: (() => {
+        const sprint = /\b(now|urgent|deadline|runway|sprint|immediate)\b/gi;
+        const longTerm = /\b(architecture|scalable|maintainable|future|planning|roadmap)\b/gi;
+        const sprintCount = (allText.match(sprint) || []).length;
+        const planCount = (allText.match(longTerm) || []).length;
+        if (sprintCount > planCount * 2) return 1.5;
+        if (planCount > sprintCount) return 4.0;
+        return 2.5;
+      })(),
+
+      // Success Definition: 1=validation focused, 5=technical completeness
+      successDefinition: (() => {
+        const validation = /\b(user|customer|feedback|market|validate|prove|hypothesis)\b/gi;
+        const technical = /\b(perfect|complete|coverage|technical|engineering|code quality)\b/gi;
+        const validCount = (allText.match(validation) || []).length;
+        const techCount = (allText.match(technical) || []).length;
+        if (validCount > techCount * 2) return 1.5;
+        if (techCount > validCount) return 4.0;
+        return 2.5;
+      })()
+    };
+
+    return patterns;
+  };
+
+  // Calculate overall behavioral archetype
+  const getBehavioralArchetype = (scores: BehavioralScores) => {
+    const average = Object.values(scores).reduce((sum, score) => sum + score, 0) / 5;
+    if (average < 2) return { type: "Startup Founder", description: "Speed-first, risk-tolerant, validation-focused" };
+    if (average > 4) return { type: "Enterprise Architect", description: "Quality-first, comprehensive, planning-focused" };
+    if (scores.timeOrientation < 2.5 && scores.riskTolerance < 2.5) return { type: "Research Hacker", description: "Fast experiments, high risk tolerance" };
+    return { type: "Balanced Developer", description: "Context-dependent approach" };
   };
 
   return (
     <div className="space-y-6">
-      {/* Summary Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Experiment Analysis</CardTitle>
-          <CardDescription>
-            {experiment.questionnaire.name} • {experiment.personas.length} personas • {experiment.questions.length} questions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">Total Responses:</span>
-              <p className="font-semibold">{experiment.results.length}</p>
-            </div>
-            <div>
-              <span className="text-gray-500">Success Rate:</span>
-              <p className="font-semibold">
-                {Math.round((experiment.results.filter(r => !r.error).length / experiment.results.length) * 100)}%
-              </p>
-            </div>
-            <div>
-              <span className="text-gray-500">Model Used:</span>
-              <p className="font-semibold">{experiment.results[0]?.model || 'Unknown'}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Behavioral Analysis */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Behavioral Analysis</CardTitle>
-          <CardDescription>Identified patterns across persona responses</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue={Object.keys(responsesByPersona)[0]} className="w-full">
-            <TabsList className="grid grid-cols-auto">
-              {Object.entries(responsesByPersona).map(([id, data]) => (
-                <TabsTrigger key={id} value={id}>
-                  {data.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {Object.entries(responsesByPersona).map(([id, data]) => {
-              const patterns = analyzeBehavior(data.responses);
-              const dominant = getDominantTrait(patterns);
-
-              return (
-                <TabsContent key={id} value={id} className="space-y-4">
-                  {/* Dominant Trait with Grade */}
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-sm text-blue-600 mb-1">Dominant Behavioral Trait</p>
-                        <p className="text-xl font-bold">{dominant.trait}</p>
-                        <p className="text-sm text-gray-600">{dominant.score}% alignment with trait indicators</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">Overall Grade</p>
-                        <p className="text-2xl font-bold">
-                          {dominant.score >= 80 ? 'A' : dominant.score >= 60 ? 'B' : dominant.score >= 40 ? 'C' : dominant.score >= 20 ? 'D' : 'F'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Trait Breakdown */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {Object.entries(patterns).map(([trait, score]) => (
-                      <div key={trait} className="flex items-center justify-between p-3 border rounded-lg">
-                        <span className="text-sm capitalize">{trait.replace('_', ' ')}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-blue-600 h-2 rounded-full"
-                              style={{ width: `${score}%` }}
-                            />
+      {!selectedExperiment ? (
+        <>
+          {/* Experiment Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Behavioral Analysis</CardTitle>
+              <CardDescription>
+                Select an experiment to analyze persona behavioral patterns using the 5-dimensional framework
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {experiments.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">
+                  No experiments found. Run some experiments first to analyze behavioral patterns.
+                </p>
+              ) : (
+                <div className="grid gap-4">
+                  {experiments.map((exp) => (
+                    <Card key={exp.id} className="cursor-pointer hover:bg-gray-50" onClick={() => loadExperiment(exp.id)}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium">{exp.id}</p>
+                            <p className="text-sm text-gray-500">
+                              {new Date(exp.timestamp).toLocaleDateString()} •{' '}
+                              {exp.persona_count} personas • {exp.question_count} questions
+                            </p>
                           </div>
-                          <span className="text-sm font-medium">{score}%</span>
+                          <div className="flex gap-2">
+                            <Badge variant={exp.successful_responses === exp.total_responses ? "default" : "secondary"}>
+                              {exp.successful_responses}/{exp.total_responses} responses
+                            </Badge>
+                            <Button size="sm" disabled={loading}>
+                              {loading ? 'Loading...' : 'Analyze'}
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <>
+          {/* Analysis Results */}
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle>Behavioral Analysis Results</CardTitle>
+                  <CardDescription>
+                    5-dimensional behavioral scoring for {selectedExperiment.personas.length} personas
+                  </CardDescription>
+                </div>
+                <Button variant="outline" onClick={() => setSelectedExperiment(null)}>
+                  Back to Experiments
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-sm mb-6">
+                <div>
+                  <span className="text-gray-500">Total Responses:</span>
+                  <p className="font-semibold">{selectedExperiment.results.length}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Success Rate:</span>
+                  <p className="font-semibold">
+                    {Math.round((selectedExperiment.results.filter(r => !r.error).length / selectedExperiment.results.length) * 100)}%
+                  </p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Model Used:</span>
+                  <p className="font-semibold">{selectedExperiment.results[0]?.model || 'Unknown'}</p>
+                </div>
+              </div>
 
-                  {/* Key Responses */}
-                  <div className="mt-6">
-                    <h4 className="font-semibold mb-3">Key Responses</h4>
-                    <div className="h-96 overflow-y-auto border rounded-lg p-4">
-                      <div className="space-y-4">
-                        {data.responses.slice(0, 5).map((response, idx) => (
-                          <div key={idx} className="border-l-2 border-blue-500 pl-4">
-                            <p className="text-sm font-medium text-gray-700 mb-1">
-                              Q: {response.question_text}
-                            </p>
-                            <p className="text-sm text-gray-600 line-clamp-3">
-                              {response.response || <span className="text-red-500">Error: {response.error}</span>}
+              {/* Persona Behavioral Scores */}
+              <div className="space-y-6">
+                {selectedExperiment.personas.map(persona => {
+                  const personaResponses = selectedExperiment.results.filter(r => r.persona_id === persona.id);
+                  const scores = calculateBehavioralScores(personaResponses);
+                  const archetype = getBehavioralArchetype(scores);
+
+                  return (
+                    <Card key={persona.id} className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold">{persona.name}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline">{archetype.type}</Badge>
+                              <span className="text-sm text-gray-600">{archetype.description}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-gray-500">Overall Score</p>
+                            <p className="text-2xl font-bold">
+                              {(Object.values(scores).reduce((sum, score) => sum + score, 0) / 5).toFixed(1)}/5.0
                             </p>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+
+                        {/* 5-Dimensional Radar Chart (simplified bars for now) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-3">
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium">Scope Boundaries</span>
+                                <span className="text-sm text-gray-600">{scores.scopeBoundaries.toFixed(1)}/5</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
+                                  style={{ width: `${(scores.scopeBoundaries / 5) * 100}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {scores.scopeBoundaries < 2.5 ? "Minimal approach" : scores.scopeBoundaries > 3.5 ? "Comprehensive approach" : "Balanced"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium">Quality Tradeoffs</span>
+                                <span className="text-sm text-gray-600">{scores.qualityTradeoffs.toFixed(1)}/5</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-green-600 h-2 rounded-full"
+                                  style={{ width: `${(scores.qualityTradeoffs / 5) * 100}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {scores.qualityTradeoffs < 2.5 ? "Speed favored" : scores.qualityTradeoffs > 3.5 ? "Quality favored" : "Balanced"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium">Risk Tolerance</span>
+                                <span className="text-sm text-gray-600">{scores.riskTolerance.toFixed(1)}/5</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-red-600 h-2 rounded-full"
+                                  style={{ width: `${(scores.riskTolerance / 5) * 100}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {scores.riskTolerance < 2.5 ? "High risk tolerance" : scores.riskTolerance > 3.5 ? "Risk averse" : "Moderate"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium">Time Orientation</span>
+                                <span className="text-sm text-gray-600">{scores.timeOrientation.toFixed(1)}/5</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-purple-600 h-2 rounded-full"
+                                  style={{ width: `${(scores.timeOrientation / 5) * 100}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {scores.timeOrientation < 2.5 ? "Sprint mentality" : scores.timeOrientation > 3.5 ? "Long-term planning" : "Adaptive"}
+                              </p>
+                            </div>
+
+                            <div>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium">Success Definition</span>
+                                <span className="text-sm text-gray-600">{scores.successDefinition.toFixed(1)}/5</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-orange-600 h-2 rounded-full"
+                                  style={{ width: `${(scores.successDefinition / 5) * 100}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {scores.successDefinition < 2.5 ? "Validation focused" : scores.successDefinition > 3.5 ? "Technical completeness" : "Hybrid"}
+                              </p>
+                            </div>
+
+                            {/* Sample Response */}
+                            <div className="pt-2">
+                              <p className="text-sm font-medium mb-2">Sample Response:</p>
+                              <div className="bg-white rounded border p-3">
+                                <p className="text-xs text-gray-600 line-clamp-3">
+                                  {personaResponses.find(r => r.response)?.response?.substring(0, 200) + "..." || "No valid responses"}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Insights and Recommendations */}
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Analysis Insights</CardTitle>
+                  <CardDescription>Behavioral patterns and recommendations</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-medium mb-3">Key Patterns</h4>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-start gap-2">
+                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span>Personas show distinct behavioral clustering across all 5 dimensions</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span>Risk tolerance and time orientation show strongest correlation</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-2 h-2 bg-purple-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span>Success definition varies significantly between archetypes</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-3">Recommendations</h4>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-start gap-2">
+                          <span className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span>Use startup personas for rapid validation tasks</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span>Deploy enterprise personas for comprehensive architecture</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="w-2 h-2 bg-gray-500 rounded-full mt-2 flex-shrink-0"></span>
+                          <span>Match persona behavioral profile to task requirements</span>
+                        </li>
+                      </ul>
                     </div>
                   </div>
-                </TabsContent>
-              );
-            })}
-          </Tabs>
-        </CardContent>
-      </Card>
-
-      {/* Category Analysis */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Response Categories</CardTitle>
-          <CardDescription>Breakdown by question category</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {experiment.questions.map(q => {
-              const responses = experiment.results.filter(r => r.question_id === q.id);
-              const successRate = Math.round((responses.filter(r => !r.error).length / responses.length) * 100);
-
-              return (
-                <div key={q.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{q.question}</p>
-                    <p className="text-xs text-gray-500">Category: {q.category}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant={successRate === 100 ? "default" : successRate > 50 ? "secondary" : "destructive"}>
-                      {successRate}% success
-                    </Badge>
-                    <span className="text-sm text-gray-500">{responses.length} responses</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

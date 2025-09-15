@@ -7,6 +7,7 @@ import { QuestionnaireManager } from '@/components/QuestionnaireManager';
 import { ExperimentRunner } from '@/components/ExperimentRunner';
 import { ResultsViewer } from '@/components/ResultsViewer';
 import { Settings } from '@/components/Settings';
+import { AnalysisView } from '@/components/AnalysisView';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('experiment');
@@ -20,11 +21,12 @@ export default function Home() {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="experiment">Run Experiment</TabsTrigger>
           <TabsTrigger value="personas">Personas</TabsTrigger>
           <TabsTrigger value="questionnaires">Questionnaires</TabsTrigger>
           <TabsTrigger value="history">Results</TabsTrigger>
+          <TabsTrigger value="analysis">Analysis</TabsTrigger>
         </TabsList>
 
         <TabsContent value="experiment" className="mt-6">
@@ -41,6 +43,10 @@ export default function Home() {
 
         <TabsContent value="history" className="mt-6">
           <ResultsViewer />
+        </TabsContent>
+
+        <TabsContent value="analysis" className="mt-6">
+          <AnalysisView />
         </TabsContent>
       </Tabs>
     </div>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { QuestionSelectionGrid } from './QuestionSelectionGrid';
 
 interface Question {
   id: string;
@@ -205,27 +206,14 @@ export function QuestionnaireManager() {
                 />
               </div>
               <div>
-                <Label>Select Questions ({formData.selectedQuestions.length} selected)</Label>
-                <div className="border rounded-lg p-4 max-h-96 overflow-y-auto mt-2">
-                  {questions.map((q) => (
-                    <div key={q.id} className="flex items-start gap-3 p-2 hover:bg-gray-50 rounded">
-                      <input
-                        type="checkbox"
-                        id={q.id}
-                        checked={formData.selectedQuestions.includes(q.id)}
-                        onChange={() => toggleQuestion(q.id)}
-                        className="mt-1"
-                      />
-                      <label htmlFor={q.id} className="flex-1 cursor-pointer">
-                        <span className="font-medium text-sm">{q.question}</span>
-                        {q.category && (
-                          <Badge variant="outline" className="ml-2 text-xs">
-                            {q.category}
-                          </Badge>
-                        )}
-                      </label>
-                    </div>
-                  ))}
+                <Label>Select Questions</Label>
+                <div className="mt-2">
+                  <QuestionSelectionGrid
+                    questions={questions}
+                    selectedQuestions={formData.selectedQuestions}
+                    onQuestionToggle={toggleQuestion}
+                    disabled={false}
+                  />
                 </div>
               </div>
               <div className="flex gap-2">
