@@ -208,7 +208,7 @@ class LLMService {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const response = await openai.chat.completions.create({
-      model: options.model || this.openaiStatus.model,
+      model: options.model || this.openaiStatus.model || 'gpt-4o-mini',
       messages,
       temperature: options.temperature || 0.7,
       max_tokens: options.max_tokens || 1000
