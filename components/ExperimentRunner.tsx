@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import { PersonaGrid } from './PersonaGrid';
+import { QuestionnairePreview } from './QuestionnairePreview';
+import ExperimentControls from './ExperimentControls';
 
 interface Persona {
   id: string;
@@ -119,7 +122,7 @@ export function ExperimentRunner() {
     );
   };
 
-  const handleRun = async () => {
+  const handleRun = async (config: any) => {
     if (!selectedQuestionnaire || selectedPersonas.length === 0) {
       setStatus('Please select at least one persona and a questionnaire');
       return;
@@ -141,7 +144,7 @@ export function ExperimentRunner() {
         body: JSON.stringify({
           personaIds: selectedPersonas,
           questionnaireId: selectedQuestionnaire,
-          model: 'gpt-4o-mini'
+          model: config.model || 'gpt-4o-mini'
         })
       });
 
@@ -161,83 +164,69 @@ export function ExperimentRunner() {
     }
   };
 
+  const selectedQuestionnaireData = questionnaires.find(q => q.id === selectedQuestionnaire);
+  const questionCount = selectedQuestionnaireData?.questions?.length || 0;
+
   return (
     <div className="space-y-6">
+      {/* Configuration Status */}
+      {!apiConfigured && (
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-sm text-yellow-800">
+            OpenAI API key not configured. Please configure it in Settings (gear icon in top right).
+          </p>
+        </div>
+      )}
+
+      {/* Persona Selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Configure Experiment</CardTitle>
-          <CardDescription>Select personas and questionnaire to run</CardDescription>
+          <CardTitle>Select Personas</CardTitle>
+          <CardDescription>Choose which personas to analyze in this experiment</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Configuration Status */}
-          {!apiConfigured && (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                OpenAI API key not configured. Please configure it in Settings (gear icon in top right).
-              </p>
-            </div>
-          )}
-
-          {/* Persona Selection */}
-          <div>
-            <Label className="text-base font-semibold mb-3 block">Select Personas</Label>
-            <div className="space-y-2">
-              {personas.map((persona) => (
-                <div key={persona.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id={persona.id}
-                    checked={selectedPersonas.includes(persona.id)}
-                    onChange={() => handlePersonaToggle(persona.id)}
-                    className="rounded"
-                  />
-                  <label htmlFor={persona.id} className="flex-1 cursor-pointer">
-                    {persona.name}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Questionnaire Selection */}
-          <div>
-            <Label className="text-base font-semibold mb-3 block">Select Questionnaire</Label>
-            <div className="space-y-2">
-              {questionnaires.map((q) => (
-                <div key={q.id} className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    id={q.id}
-                    name="questionnaire"
-                    checked={selectedQuestionnaire === q.id}
-                    onChange={() => setSelectedQuestionnaire(q.id)}
-                    className="rounded"
-                  />
-                  <label htmlFor={q.id} className="flex-1 cursor-pointer">
-                    {q.name} ({q.questions.length} questions)
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Run Button */}
-          <div className="flex items-center justify-between">
-            <Button
-              onClick={handleRun}
-              disabled={running}
-              size="lg"
-            >
-              {running ? 'Running...' : 'Start Experiment'}
-            </Button>
-            {status && (
-              <Badge variant={running ? 'default' : 'secondary'}>
-                {status}
-              </Badge>
-            )}
-          </div>
+        <CardContent>
+          <PersonaGrid
+            personas={personas}
+            selectedPersonas={selectedPersonas}
+            onPersonaToggle={handlePersonaToggle}
+            disabled={running}
+          />
         </CardContent>
       </Card>
+
+      {/* Questionnaire Selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Select Questionnaire</CardTitle>
+          <CardDescription>Choose the questionnaire to use for analysis</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <QuestionnairePreview
+            questionnaires={questionnaires}
+            selectedQuestionnaire={selectedQuestionnaire}
+            onQuestionnaireSelect={setSelectedQuestionnaire}
+            disabled={running}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Experiment Controls */}
+      <ExperimentControls
+        selectedPersonas={selectedPersonas}
+        selectedQuestionnaire={selectedQuestionnaire}
+        questionCount={questionCount}
+        onRunExperiment={handleRun}
+        isRunning={running}
+      />
+
+      {/* Status Display */}
+      {status && (
+        <div className="flex justify-center">
+          <Badge variant={running ? 'default' : 'secondary'} className="text-sm px-4 py-2">
+            {status}
+          </Badge>
+        </div>
+      )}
 
       {/* Experiment Progress */}
       {experimentStatus && (
