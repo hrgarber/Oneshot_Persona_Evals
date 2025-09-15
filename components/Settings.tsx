@@ -90,13 +90,15 @@ export function Settings() {
       });
 
       if (res.ok) {
+        const data = await res.json();
         setApiConfigured(true);
-        setStatus('API key configured successfully');
-        setTimeout(() => setStatus(''), 3000);
+        setStatus(data.message || 'API key configured successfully');
+        setTimeout(() => setStatus(''), data.temporary ? 8000 : 3000);
         // Recheck LLM status after updating API key
         checkLLMStatus();
       } else {
-        setStatus('Failed to configure API key');
+        const errorData = await res.json();
+        setStatus(errorData.error || 'Failed to configure API key');
       }
     } catch {
       setStatus('Error configuring API key');
