@@ -5,7 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface Question {
+  id: string;
+  text: string;
+  question: string;
+}
 
 interface Questionnaire {
   id: string;
@@ -27,6 +33,26 @@ export function QuestionnaireGrid({
   disabled = false
 }: QuestionnaireGridProps) {
   const [previewQuestionnaire, setPreviewQuestionnaire] = useState<Questionnaire | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch('/api/questions');
+        const questionsData = await response.json();
+        setQuestions(questionsData);
+      } catch (error) {
+        console.error('Failed to fetch questions:', error);
+      }
+    };
+
+    fetchQuestions();
+  }, []);
+
+  const getQuestionText = (questionId: string): string => {
+    const question = questions.find(q => q.id === questionId);
+    return question ? question.text : questionId;
+  };
 
   const handleCardClick = (questionnaire: Questionnaire) => {
     if (!disabled) {
@@ -168,7 +194,7 @@ export function QuestionnaireGrid({
                     <span className="font-semibold text-gray-500 min-w-[24px]">
                       {index + 1}.
                     </span>
-                    <span className="text-gray-700">{question}</span>
+                    <span className="text-gray-700">{getQuestionText(question)}</span>
                   </div>
                 </div>
               )) || (
