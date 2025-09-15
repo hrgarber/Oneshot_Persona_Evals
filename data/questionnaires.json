@@ -2,7 +2,7 @@
   {
     "id": "behavioral_analysis_v1",
     "name": "Behavioral Analysis Questionnaire v1",
-    "description": "Complete 11-question behavioral analysis questionnaire for understanding persona approaches to software development",
+    "description": "Core behavioral analysis questions testing decision-making patterns, risk tolerance, time orientation, and success definitions across different AI personas.",
     "questions": [
       "q01_requirements_uncertainty",
       "q02_time_quality_tradeoff",
@@ -16,7 +16,7 @@
       "q10_exclusion_intent",
       "q11_validation_intent"
     ],
-    "created_at": "2025-01-14T00:00:00Z",
-    "updated_at": "2025-01-14T00:00:00Z"
+    "created_at": "2025-09-14T03:45:00Z",
+    "updated_at": "2025-09-14T03:45:00Z"
   }
 ]
