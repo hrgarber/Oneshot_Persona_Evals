@@ -20,11 +20,12 @@ async function saveQuestions(questions: any[]) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const questions = await loadQuestions();
-    const question = questions.find((q: any) => q.id === params.id);
+    const question = questions.find((q: any) => q.id === id);
 
     if (!question) {
       return NextResponse.json(
@@ -45,12 +46,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const updatedQuestion = await request.json();
     const questions = await loadQuestions();
-    const index = questions.findIndex((q: any) => q.id === params.id);
+    const index = questions.findIndex((q: any) => q.id === id);
 
     if (index === -1) {
       return NextResponse.json(
@@ -79,11 +81,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const questions = await loadQuestions();
-    const filteredQuestions = questions.filter((q: any) => q.id !== params.id);
+    const filteredQuestions = questions.filter((q: any) => q.id !== id);
 
     if (questions.length === filteredQuestions.length) {
       return NextResponse.json(
