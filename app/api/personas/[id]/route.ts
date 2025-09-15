@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import { Persona } from '../../../types/api';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'personas.json');
 
-async function loadPersonas() {
+async function loadPersonas(): Promise<Persona[]> {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf-8');
     return JSON.parse(data);
@@ -13,7 +14,7 @@ async function loadPersonas() {
   }
 }
 
-async function savePersonas(personas: any[]) {
+async function savePersonas(personas: Persona[]) {
   await fs.writeFile(DATA_FILE, JSON.stringify(personas, null, 2));
 }
 
@@ -25,7 +26,7 @@ export async function PUT(
   const body = await request.json();
   const personas = await loadPersonas();
 
-  const index = personas.findIndex((p: any) => p.id === id);
+  const index = personas.findIndex((p: Persona) => p.id === id);
   if (index === -1) {
     return NextResponse.json({ error: 'Persona not found' }, { status: 404 });
   }
@@ -42,7 +43,7 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const personas = await loadPersonas();
-  const filtered = personas.filter((p: any) => p.id !== id);
+  const filtered = personas.filter((p: Persona) => p.id !== id);
 
   await savePersonas(filtered);
 

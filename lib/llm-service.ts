@@ -1,6 +1,8 @@
 // Unified LLM Service with Ollama as default, OpenAI as fallback
 // HYPOTHESIS: Using Ollama as default reduces costs while maintaining functionality
 
+import OpenAI from 'openai';
+
 interface LLMProvider {
   name: 'ollama' | 'openai';
   available: boolean;
@@ -9,17 +11,42 @@ interface LLMProvider {
   lastChecked?: Date;
 }
 
-interface ChatMessage {
+interface LLMMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-interface ChatResponse {
+interface LLMOptions {
+  model?: string;
+  temperature?: number;
+  max_tokens?: number;
+}
+
+interface LLMUsage {
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+}
+
+interface LLMResponse {
   content: string;
   provider: string;
   model: string;
-  usage?: any;
+  usage?: LLMUsage;
 }
+
+interface OllamaModel {
+  name: string;
+  model?: string;
+  modified_at?: string;
+  size?: number;
+  digest?: string;
+  details?: any;
+}
+
+// Legacy aliases for backward compatibility
+type ChatMessage = LLMMessage;
+type ChatResponse = LLMResponse;
 
 class LLMService {
   private ollamaStatus: LLMProvider = {
@@ -54,14 +81,14 @@ class LLMService {
       if (response.ok) {
         const data = await response.json();
         // Check if our preferred model exists
-        const models = data.models || [];
+        const models: OllamaModel[] = data.models || [];
 
         this.ollamaStatus.available = models.length > 0;
         this.ollamaStatus.lastChecked = new Date();
 
         if (models.length > 0) {
           // Check for qwen3-coder first, then other preferred models
-          const preferredModel = models.find((m: any) =>
+          const preferredModel = models.find((m: OllamaModel) =>
             m.name === 'qwen3-coder' ||
             m.name === 'qwen3-coder:latest' ||
             m.name === 'qwen3:latest' ||
@@ -73,7 +100,7 @@ class LLMService {
           } else {
             // Use configured model or first available
             const configuredModel = process.env.OLLAMA_MODEL || 'qwen3-coder';
-            const hasConfigured = models.find((m: any) => m.name === configuredModel);
+            const hasConfigured = models.find((m: OllamaModel) => m.name === configuredModel);
             this.ollamaStatus.model = hasConfigured ? configuredModel : models[0].name;
           }
         }
@@ -112,7 +139,7 @@ class LLMService {
     }
   }
 
-  async chat(messages: ChatMessage[], options: any = {}): Promise<ChatResponse> {
+  async chat(messages: LLMMessage[], options: LLMOptions = {}): Promise<LLMResponse> {
     await this.ensureProviders();
 
     // Try Ollama first if available
@@ -138,7 +165,7 @@ class LLMService {
     throw new Error('No LLM provider available. Please configure Ollama or OpenAI.');
   }
 
-  private async chatWithOllama(messages: ChatMessage[], options: any): Promise<ChatResponse> {
+  private async chatWithOllama(messages: LLMMessage[], options: LLMOptions): Promise<LLMResponse> {
     // Use Ollama's model, not the OpenAI model name passed in options
     const modelToUse = this.ollamaStatus.model;
 
@@ -176,9 +203,8 @@ class LLMService {
     };
   }
 
-  private async chatWithOpenAI(messages: ChatMessage[], options: any): Promise<ChatResponse> {
-    // HACK: Direct OpenAI call for MVP - avoid complex imports
-    const OpenAI = require('openai');
+  private async chatWithOpenAI(messages: LLMMessage[], options: LLMOptions): Promise<LLMResponse> {
+    // Direct OpenAI call using ES6 import
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const response = await openai.chat.completions.create({

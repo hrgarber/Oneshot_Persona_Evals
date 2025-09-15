@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import { Questionnaire } from '../../../types/api';
 
 const DATA_FILE = path.join(process.cwd(), 'data', 'questionnaires.json');
 
-async function loadQuestionnaires() {
+async function loadQuestionnaires(): Promise<Questionnaire[]> {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf-8');
     return JSON.parse(data);
@@ -13,7 +14,7 @@ async function loadQuestionnaires() {
   }
 }
 
-async function saveQuestionnaires(questionnaires: any[]) {
+async function saveQuestionnaires(questionnaires: Questionnaire[]) {
   await fs.writeFile(DATA_FILE, JSON.stringify(questionnaires, null, 2));
 }
 
@@ -26,7 +27,7 @@ export async function PUT(
     const body = await request.json();
     const questionnaires = await loadQuestionnaires();
 
-    const index = questionnaires.findIndex((q: any) => q.id === id);
+    const index = questionnaires.findIndex((q: Questionnaire) => q.id === id);
     if (index === -1) {
       return NextResponse.json({ error: 'Questionnaire not found' }, { status: 404 });
     }
@@ -39,8 +40,8 @@ export async function PUT(
 
     await saveQuestionnaires(questionnaires);
     return NextResponse.json(questionnaires[index]);
-  } catch (error) {
-    console.error('Error updating questionnaire:', error);
+  } catch {
+    console.error('Error updating questionnaire');
     return NextResponse.json({ error: 'Failed to update questionnaire' }, { status: 500 });
   }
 }
@@ -52,7 +53,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     const questionnaires = await loadQuestionnaires();
-    const filtered = questionnaires.filter((q: any) => q.id !== id);
+    const filtered = questionnaires.filter((q: Questionnaire) => q.id !== id);
 
     if (filtered.length === questionnaires.length) {
       return NextResponse.json({ error: 'Questionnaire not found' }, { status: 404 });
@@ -60,8 +61,8 @@ export async function DELETE(
 
     await saveQuestionnaires(filtered);
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting questionnaire:', error);
+  } catch {
+    console.error('Error deleting questionnaire');
     return NextResponse.json({ error: 'Failed to delete questionnaire' }, { status: 500 });
   }
 }
@@ -73,15 +74,15 @@ export async function GET(
   try {
     const { id } = await params;
     const questionnaires = await loadQuestionnaires();
-    const questionnaire = questionnaires.find((q: any) => q.id === id);
+    const questionnaire = questionnaires.find((q: Questionnaire) => q.id === id);
 
     if (!questionnaire) {
       return NextResponse.json({ error: 'Questionnaire not found' }, { status: 404 });
     }
 
     return NextResponse.json(questionnaire);
-  } catch (error) {
-    console.error('Error fetching questionnaire:', error);
+  } catch {
+    console.error('Error fetching questionnaire');
     return NextResponse.json({ error: 'Failed to fetch questionnaire' }, { status: 500 });
   }
 }

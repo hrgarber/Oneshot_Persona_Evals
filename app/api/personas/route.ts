@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { promises as fs } from 'fs';
+import * as path from 'path';
+import { Persona } from '../../types/api';
 
 // HACK: hardcoded data path for validation
 const DATA_FILE = path.join(process.cwd(), 'data', 'personas.json');
@@ -12,7 +13,7 @@ async function ensureDataDir() {
   } catch {}
 }
 
-async function loadPersonas() {
+async function loadPersonas(): Promise<Persona[]> {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf-8');
     return JSON.parse(data);
@@ -21,7 +22,7 @@ async function loadPersonas() {
   }
 }
 
-async function savePersonas(personas: any[]) {
+async function savePersonas(personas: Persona[]) {
   await ensureDataDir();
   await fs.writeFile(DATA_FILE, JSON.stringify(personas, null, 2));
 }
@@ -36,9 +37,12 @@ export async function POST(request: Request) {
   const personas = await loadPersonas();
 
   // HACK: Simple ID generation for POC
-  const newPersona = {
+  const newPersona: Persona = {
     id: `persona_${Date.now()}`,
-    ...body,
+    name: body.name || '',
+    description: body.description || '',
+    behavioral_profile: body.behavioral_profile,
+    createdAt: new Date().toISOString(),
   };
 
   personas.push(newPersona);

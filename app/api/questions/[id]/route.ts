@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
-import path from 'path';
+import * as path from 'path';
+import { Question } from '../../../types/api';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const QUESTIONS_FILE = path.join(DATA_DIR, 'questions.json');
 
-async function loadQuestions() {
+async function loadQuestions(): Promise<Question[]> {
   try {
     const content = await fs.readFile(QUESTIONS_FILE, 'utf-8');
     return JSON.parse(content);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
 
-async function saveQuestions(questions: any[]) {
+async function saveQuestions(questions: Question[]) {
   await fs.writeFile(QUESTIONS_FILE, JSON.stringify(questions, null, 2));
 }
 
@@ -25,7 +26,7 @@ export async function GET(
   try {
     const { id } = await params;
     const questions = await loadQuestions();
-    const question = questions.find((q: any) => q.id === id);
+    const question = questions.find((q: Question) => q.id === id);
 
     if (!question) {
       return NextResponse.json(
@@ -35,8 +36,8 @@ export async function GET(
     }
 
     return NextResponse.json(question);
-  } catch (error) {
-    console.error('Error loading question:', error);
+  } catch {
+    console.error('Error loading question');
     return NextResponse.json(
       { error: 'Failed to load question' },
       { status: 500 }
@@ -52,7 +53,7 @@ export async function PUT(
     const { id } = await params;
     const updatedQuestion = await request.json();
     const questions = await loadQuestions();
-    const index = questions.findIndex((q: any) => q.id === id);
+    const index = questions.findIndex((q: Question) => q.id === id);
 
     if (index === -1) {
       return NextResponse.json(
@@ -70,8 +71,8 @@ export async function PUT(
     await saveQuestions(questions);
 
     return NextResponse.json(questions[index]);
-  } catch (error) {
-    console.error('Error updating question:', error);
+  } catch {
+    console.error('Error updating question');
     return NextResponse.json(
       { error: 'Failed to update question' },
       { status: 500 }
@@ -86,7 +87,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     const questions = await loadQuestions();
-    const filteredQuestions = questions.filter((q: any) => q.id !== id);
+    const filteredQuestions = questions.filter((q: Question) => q.id !== id);
 
     if (questions.length === filteredQuestions.length) {
       return NextResponse.json(
@@ -98,8 +99,8 @@ export async function DELETE(
     await saveQuestions(filteredQuestions);
 
     return NextResponse.json({ message: 'Question deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting question:', error);
+  } catch {
+    console.error('Error deleting question');
     return NextResponse.json(
       { error: 'Failed to delete question' },
       { status: 500 }

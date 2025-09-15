@@ -1,48 +1,100 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
-import path from 'path';
+import * as path from 'path';
 import llmService from '@/lib/llm-service';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const RESULTS_DIR = path.join(process.cwd(), 'results', 'experiments');
 
-// HACK: Simple in-memory experiment state for MVP
-const runningExperiments = new Map();
+// Type definitions
+interface ExperimentRequest {
+  personaIds: string[];
+  questionnaireId: string;
+  model?: string;
+}
 
-async function loadPersonas() {
+interface ExperimentResult {
+  persona_name: string;
+  persona_id: string;
+  question_id: string;
+  question_text: string;
+  response?: string;
+  error?: string;
+  timestamp: string;
+  model?: string;
+  provider?: string;
+  usage?: any; // LLM usage stats can vary by provider
+}
+
+interface RunningExperiment {
+  id: string;
+  status: string;
+  startTime: string;
+  totalPersonas: number;
+  totalQuestions: number;
+  currentPersona: number;
+  currentPersonaName?: string;
+  endTime?: string;
+  results: ExperimentResult[];
+}
+
+interface Persona {
+  id: string;
+  name: string;
+  description: string;
+  behavioral_profile?: string;
+}
+
+interface Question {
+  id: string;
+  text?: string;
+  question?: string;
+}
+
+interface Questionnaire {
+  id: string;
+  name: string;
+  questions: string[];
+  resolved_questions: Question[];
+}
+
+// HACK: Simple in-memory experiment state for MVP
+const runningExperiments = new Map<string, RunningExperiment>();
+
+async function loadPersonas(): Promise<Persona[]> {
   try {
     const content = await fs.readFile(path.join(DATA_DIR, 'personas.json'), 'utf-8');
-    return JSON.parse(content);
-  } catch (error) {
+    return JSON.parse(content) as Persona[];
+  } catch {
     return [];
   }
 }
 
-async function loadQuestionnaire(id: string) {
+async function loadQuestionnaire(id: string): Promise<Questionnaire | null> {
   try {
     const questionnairesContent = await fs.readFile(path.join(DATA_DIR, 'questionnaires.json'), 'utf-8');
-    const questionnaires = JSON.parse(questionnairesContent);
-    const questionnaire = questionnaires.find((q: any) => q.id === id);
+    const questionnaires = JSON.parse(questionnairesContent) as Questionnaire[];
+    const questionnaire = questionnaires.find((q) => q.id === id);
 
     if (!questionnaire) return null;
 
     // Load questions
     const questionsContent = await fs.readFile(path.join(DATA_DIR, 'questions.json'), 'utf-8');
-    const allQuestions = JSON.parse(questionsContent);
+    const allQuestions = JSON.parse(questionsContent) as Question[];
 
     // Resolve questions
     const questions = questionnaire.questions.map((qId: string) => {
-      return allQuestions.find((q: any) => q.id === qId) || { id: qId, question: 'Question not found' };
+      return allQuestions.find((q) => q.id === qId) || { id: qId, question: 'Question not found' };
     });
 
     return { ...questionnaire, resolved_questions: questions };
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
-async function testPersona(persona: any, questions: any[], model: string = 'gpt-4o-mini') {
-  const results = [];
+async function testPersona(persona: Persona, questions: Question[], model: string = 'gpt-4o-mini'): Promise<ExperimentResult[]> {
+  const results: ExperimentResult[] = [];
 
   // Test each question sequentially
   for (const question of questions) {
@@ -59,7 +111,7 @@ Respond to questions from this persona's perspective. Be authentic to this role.
       const response = await llmService.chat(
         [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: question.text || question.question }
+          { role: 'user', content: question.text || question.question || 'No question text available' }
         ],
         {
           model,
@@ -72,7 +124,7 @@ Respond to questions from this persona's perspective. Be authentic to this role.
         persona_name: persona.name,
         persona_id: persona.id,
         question_id: question.id,
-        question_text: question.text || question.question,
+        question_text: question.text || question.question || 'No question text available',
         response: response.content,
         timestamp: new Date().toISOString(),
         model: response.model,
@@ -84,7 +136,7 @@ Respond to questions from this persona's perspective. Be authentic to this role.
         persona_name: persona.name,
         persona_id: persona.id,
         question_id: question.id,
-        question_text: question.text || question.question,
+        question_text: question.text || question.question || 'No question text available',
         error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
       });
@@ -96,7 +148,7 @@ Respond to questions from this persona's perspective. Be authentic to this role.
 
 export async function POST(request: NextRequest) {
   try {
-    const { personaIds, questionnaireId, model = 'gpt-4o-mini' } = await request.json();
+    const { personaIds, questionnaireId, model = 'gpt-4o-mini' }: ExperimentRequest = await request.json();
 
     if (!personaIds || !personaIds.length || !questionnaireId) {
       return NextResponse.json(
@@ -116,7 +168,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const personas = allPersonas.filter((p: any) => personaIds.includes(p.id));
+    const personas = allPersonas.filter((p) => personaIds.includes(p.id));
 
     if (personas.length === 0) {
       return NextResponse.json(
@@ -140,7 +192,7 @@ export async function POST(request: NextRequest) {
 
     // Run experiment asynchronously
     (async () => {
-      const allResults = [];
+      const allResults: ExperimentResult[] = [];
 
       for (let i = 0; i < personas.length; i++) {
         const persona = personas[i];
@@ -164,12 +216,12 @@ export async function POST(request: NextRequest) {
         id: experimentId,
         timestamp: new Date().toISOString(),
         status: 'completed',
-        personas: personas.map((p: any) => ({ id: p.id, name: p.name })),
+        personas: personas.map((p) => ({ id: p.id, name: p.name })),
         questionnaire: { id: questionnaire.id, name: questionnaire.name },
         questions: questionnaire.resolved_questions,
         model,
         total_responses: allResults.length,
-        successful_responses: allResults.filter((r: any) => !r.error).length,
+        successful_responses: allResults.filter((r) => !r.error).length,
         results: allResults
       };
 
@@ -217,7 +269,7 @@ export async function GET(request: NextRequest) {
       const filePath = path.join(RESULTS_DIR, `${experimentId}.json`);
       const content = await fs.readFile(filePath, 'utf-8');
       return NextResponse.json(JSON.parse(content));
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Experiment not found' },
         { status: 404 }

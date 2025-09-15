@@ -1,5 +1,16 @@
 {
   "extends": ["next/core-web-vitals"],
+  "ignorePatterns": [
+    ".next/**",
+    ".vercel/**",
+    "archive/**",
+    "out/**",
+    "dist/**",
+    "build/**",
+    "*.test.js",
+    "*.test.ts",
+    "*.test.tsx"
+  ],
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": "off",

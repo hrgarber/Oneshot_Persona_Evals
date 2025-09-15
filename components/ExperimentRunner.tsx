@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 
@@ -21,6 +20,15 @@ interface Questionnaire {
   questions: string[];
 }
 
+interface ExperimentResult {
+  persona_id: string;
+  question_id: string;
+  response: string;
+  timestamp: string;
+  error?: string;
+}
+
+
 interface ExperimentStatus {
   id: string;
   status: 'running' | 'completed' | 'error';
@@ -28,7 +36,7 @@ interface ExperimentStatus {
   currentPersonaName?: string;
   totalPersonas: number;
   totalQuestions: number;
-  results?: any[];
+  results?: ExperimentResult[];
 }
 
 export function ExperimentRunner() {
@@ -265,10 +273,10 @@ export function ExperimentRunner() {
                   Total Responses: {experimentStatus.results.length}
                 </p>
                 <p className="text-sm">
-                  Successful: {experimentStatus.results.filter((r: { error?: unknown }) => !r.error).length}
+                  Successful: {experimentStatus.results.filter((r: ExperimentResult) => !r.error).length}
                 </p>
                 <p className="text-sm">
-                  Failed: {experimentStatus.results.filter((r: { error?: unknown }) => r.error).length}
+                  Failed: {experimentStatus.results.filter((r: ExperimentResult) => r.error).length}
                 </p>
                 <Button
                   onClick={() => window.open(`/api/experiments/${experimentId}`, '_blank')}

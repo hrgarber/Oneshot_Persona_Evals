@@ -1,6 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
+interface LLMStatus {
+  primary: string;
+  ollama: { available: boolean; model: string };
+  openai: { available: boolean; model: string };
+}
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +51,7 @@ export function Settings() {
   const [apiConfigured, setApiConfigured] = useState(false);
   const [status, setStatus] = useState('');
   const [open, setOpen] = useState(false);
-  const [llmStatus, setLlmStatus] = useState<any>(null);
+  const [llmStatus, setLlmStatus] = useState<LLMStatus | null>(null);
 
   useEffect(() => {
     checkApiKey();
@@ -92,7 +98,7 @@ export function Settings() {
       } else {
         setStatus('Failed to configure API key');
       }
-    } catch (error) {
+    } catch {
       setStatus('Error configuring API key');
     }
   };

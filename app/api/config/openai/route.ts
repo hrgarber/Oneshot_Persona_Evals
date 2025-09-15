@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     let envContent = '';
     try {
       envContent = await fs.readFile(ENV_FILE, 'utf-8');
-    } catch (error) {
+    } catch {
       // File doesn't exist, create new content
       envContent = '';
     }

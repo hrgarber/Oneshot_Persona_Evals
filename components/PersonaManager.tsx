@@ -19,7 +19,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 // REMOVED: PersonaQuestionnaire and analyzeBehavioralProfile imports - separation of concerns
 import { BehavioralProfileBadges } from './BehavioralProfileBadges';
 import { FileText, Upload } from 'lucide-react';
@@ -57,7 +56,7 @@ export function PersonaManager() {
       const res = await fetch('/api/personas');
       const data = await res.json();
       setPersonas(data);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch personas');
     } finally {
       setLoading(false);
@@ -90,7 +89,7 @@ export function PersonaManager() {
       } else {
         toast.error('Failed to save persona');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to save persona');
     }
   };
@@ -106,7 +105,7 @@ export function PersonaManager() {
       } else {
         toast.error('Failed to delete persona');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete persona');
     } finally {
       setDeleteDialogOpen(false);

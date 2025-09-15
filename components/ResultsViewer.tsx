@@ -73,7 +73,7 @@ interface ExperimentDetails {
   timestamp: string;
   personas: Array<{ id: string; name: string }>;
   questionnaire: { id: string; name: string };
-  questions: any[];
+  questions: Array<{ id: string; question: string; category: string }>;
   results: Array<{
     persona_name: string;
     persona_id: string;
