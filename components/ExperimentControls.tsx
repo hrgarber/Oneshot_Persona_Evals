@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // Removed broken Select component imports that caused nested select issues
@@ -15,6 +15,21 @@ interface ExperimentConfig {
   temperature: number;
   max_tokens: number;
   enableAnalysis: boolean;
+}
+
+interface LLMStatus {
+  primary: 'ollama' | 'openai';
+  ollama: {
+    available: boolean;
+    endpoint: string;
+    model: string;
+    lastChecked: string;
+  };
+  openai: {
+    available: boolean;
+    configured: boolean;
+    model: string;
+  };
 }
 
 interface ExperimentControlsProps {
@@ -37,6 +52,27 @@ export default function ExperimentControls({
   const [maxTokens, setMaxTokens] = useState(2000);
   const [enableAnalysis, setEnableAnalysis] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [llmStatus, setLlmStatus] = useState<LLMStatus | null>(null);
+
+  // Fetch LLM status and set default model
+  useEffect(() => {
+    const fetchLlmStatus = async () => {
+      try {
+        const response = await fetch('/api/llm/status');
+        const status: LLMStatus = await response.json();
+        setLlmStatus(status);
+
+        // Set default model to Ollama if available, otherwise keep GPT-5
+        if (status.ollama.available && status.ollama.model) {
+          setModel(status.ollama.model);
+        }
+      } catch (error) {
+        console.error('Failed to fetch LLM status:', error);
+      }
+    };
+
+    fetchLlmStatus();
+  }, []);
 
   // Calculate estimated runtime (personas × questions × 45s)
   // Add extra time if analysis is enabled (10s per persona)
@@ -108,6 +144,12 @@ export default function ExperimentControls({
             onChange={(e) => setModel(e.target.value)}
             className="flex h-10 w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
+            {/* Show Ollama model first when available */}
+            {llmStatus?.ollama.available && (
+              <option value={llmStatus.ollama.model}>
+                {llmStatus.ollama.model} - Ollama (Local, Free) ⚡
+              </option>
+            )}
             <option value="gpt-5-mini">GPT-5 mini - Faster, cheaper ($0.25/$2.00 per 1M)</option>
             <option value="gpt-5-nano">GPT-5 nano - Fastest, cheapest ($0.05/$0.40 per 1M)</option>
             <option value="gpt-5">GPT-5 - Best for coding & agentic tasks ($1.25/$10.00 per 1M)</option>
