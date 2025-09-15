@@ -2,12 +2,11 @@
 
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PersonaManager } from '@/components/PersonaManager';
-import { QuestionnaireManager } from '@/components/QuestionnaireManager';
 import { ExperimentRunner } from '@/components/ExperimentRunner';
+import { ManageTab } from '@/components/ManageTab';
 import { ResultsViewer } from '@/components/ResultsViewer';
-import { Settings } from '@/components/Settings';
 import { AnalysisView } from '@/components/AnalysisView';
+import { Settings } from '@/components/Settings';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('experiment');
@@ -21,10 +20,9 @@ export default function Home() {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="experiment">Run Experiment</TabsTrigger>
-          <TabsTrigger value="personas">Personas</TabsTrigger>
-          <TabsTrigger value="questionnaires">Questionnaires</TabsTrigger>
+          <TabsTrigger value="manage">Manage</TabsTrigger>
           <TabsTrigger value="history">Results</TabsTrigger>
           <TabsTrigger value="analysis">Analysis</TabsTrigger>
         </TabsList>
@@ -33,12 +31,8 @@ export default function Home() {
           <ExperimentRunner />
         </TabsContent>
 
-        <TabsContent value="personas" className="mt-6">
-          <PersonaManager />
-        </TabsContent>
-
-        <TabsContent value="questionnaires" className="mt-6">
-          <QuestionnaireManager />
+        <TabsContent value="manage" className="mt-6">
+          <ManageTab />
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">

@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { PersonaGrid } from './PersonaGrid';
-import { QuestionnairePreview } from './QuestionnairePreview';
+import { QuestionnaireGrid } from './QuestionnaireGrid';
 import ExperimentControls from './ExperimentControls';
 
 interface Persona {
@@ -114,12 +114,8 @@ export function ExperimentRunner() {
     setPollingInterval(interval);
   };
 
-  const handlePersonaToggle = (id: string) => {
-    setSelectedPersonas(prev =>
-      prev.includes(id)
-        ? prev.filter(p => p !== id)
-        : [...prev, id]
-    );
+  const handlePersonaSelectionChange = (selectedIds: string[]) => {
+    setSelectedPersonas(selectedIds);
   };
 
   const handleRun = async (config: any) => {
@@ -144,7 +140,8 @@ export function ExperimentRunner() {
         body: JSON.stringify({
           personaIds: selectedPersonas,
           questionnaireId: selectedQuestionnaire,
-          model: config.model || 'gpt-4o-mini'
+          model: config.model || 'gpt-5-mini',
+          enableAnalysis: config.enableAnalysis || false
         })
       });
 
@@ -188,7 +185,7 @@ export function ExperimentRunner() {
           <PersonaGrid
             personas={personas}
             selectedPersonas={selectedPersonas}
-            onPersonaToggle={handlePersonaToggle}
+            onSelectionChange={handlePersonaSelectionChange}
             disabled={running}
           />
         </CardContent>
@@ -201,7 +198,7 @@ export function ExperimentRunner() {
           <CardDescription>Choose the questionnaire to use for analysis</CardDescription>
         </CardHeader>
         <CardContent>
-          <QuestionnairePreview
+          <QuestionnaireGrid
             questionnaires={questionnaires}
             selectedQuestionnaire={selectedQuestionnaire}
             onQuestionnaireSelect={setSelectedQuestionnaire}

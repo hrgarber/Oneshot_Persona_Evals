@@ -1,19 +1,35 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Removed broken Select component imports that caused nested select issues
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Play, Clock, AlertCircle } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { ChevronDown, Play, Clock, AlertCircle, Brain } from 'lucide-react';
 
 interface ExperimentConfig {
   model: string;
   temperature: number;
   max_tokens: number;
-  provider?: string;
+  enableAnalysis: boolean;
+}
+
+interface LLMStatus {
+  primary: 'ollama' | 'openai';
+  ollama: {
+    available: boolean;
+    endpoint: string;
+    model: string;
+    lastChecked: string;
+  };
+  openai: {
+    available: boolean;
+    configured: boolean;
+    model: string;
+  };
 }
 
 interface ExperimentControlsProps {
@@ -31,14 +47,38 @@ export default function ExperimentControls({
   onRunExperiment,
   isRunning = false
 }: ExperimentControlsProps) {
-  const [model, setModel] = useState('gpt-4o-mini');
+  const [model, setModel] = useState('gpt-5-mini');
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(2000);
-  const [provider, setProvider] = useState('openai');
+  const [enableAnalysis, setEnableAnalysis] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [llmStatus, setLlmStatus] = useState<LLMStatus | null>(null);
+
+  // Fetch LLM status and set default model
+  useEffect(() => {
+    const fetchLlmStatus = async () => {
+      try {
+        const response = await fetch('/api/llm/status');
+        const status: LLMStatus = await response.json();
+        setLlmStatus(status);
+
+        // Set default model to Ollama if available, otherwise keep GPT-5
+        if (status.ollama.available && status.ollama.model) {
+          setModel(status.ollama.model);
+        }
+      } catch (error) {
+        console.error('Failed to fetch LLM status:', error);
+      }
+    };
+
+    fetchLlmStatus();
+  }, []);
 
   // Calculate estimated runtime (personas × questions × 45s)
-  const estimatedSeconds = selectedPersonas.length * questionCount * 45;
+  // Add extra time if analysis is enabled (10s per persona)
+  const baseSeconds = selectedPersonas.length * questionCount * 45;
+  const analysisSeconds = enableAnalysis ? selectedPersonas.length * 10 : 0;
+  const estimatedSeconds = baseSeconds + analysisSeconds;
   const estimatedMinutes = Math.ceil(estimatedSeconds / 60);
 
   // Validation
@@ -59,7 +99,7 @@ export default function ExperimentControls({
       model,
       temperature,
       max_tokens: maxTokens,
-      provider
+      enableAnalysis: enableAnalysis
     };
 
     onRunExperiment(config);
@@ -74,21 +114,46 @@ export default function ExperimentControls({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Analysis Toggle */}
+        <div className="flex items-center justify-between p-4 bg-purple-50 border border-purple-200 rounded-lg">
+          <div className="flex items-center gap-3">
+            <Brain className="h-5 w-5 text-purple-600" />
+            <div>
+              <Label htmlFor="enable-analysis" className="text-base font-medium cursor-pointer">
+                Enable Behavioral Analysis
+              </Label>
+              <p className="text-sm text-gray-600 mt-1">
+                Automatically analyze responses for behavioral dimensions after completion
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="enable-analysis"
+            checked={enableAnalysis}
+            onCheckedChange={setEnableAnalysis}
+            disabled={isRunning}
+          />
+        </div>
+
         {/* Model Selection */}
         <div className="space-y-2">
           <Label htmlFor="model">Model</Label>
-          <Select value={model} onValueChange={setModel}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select model" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="gpt-4o-mini">GPT-4o Mini (Recommended)</SelectItem>
-              <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-              <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
-              <SelectItem value="claude-3-haiku">Claude 3 Haiku</SelectItem>
-              <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            id="model"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {/* Show Ollama model first when available */}
+            {llmStatus?.ollama.available && (
+              <option value={llmStatus.ollama.model}>
+                {llmStatus.ollama.model} - Ollama (Local, Free) ⚡
+              </option>
+            )}
+            <option value="gpt-5-mini">GPT-5 mini - Faster, cheaper ($0.25/$2.00 per 1M)</option>
+            <option value="gpt-5-nano">GPT-5 nano - Fastest, cheapest ($0.05/$0.40 per 1M)</option>
+            <option value="gpt-5">GPT-5 - Best for coding & agentic tasks ($1.25/$10.00 per 1M)</option>
+          </select>
         </div>
 
         {/* Advanced Settings */}
@@ -125,18 +190,6 @@ export default function ExperimentControls({
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="provider">Provider</Label>
-              <Select value={provider} onValueChange={setProvider}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select provider" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="openai">OpenAI</SelectItem>
-                  <SelectItem value="anthropic">Anthropic</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </CollapsibleContent>
         </Collapsible>
 
@@ -149,6 +202,7 @@ export default function ExperimentControls({
             </div>
             <p className="text-sm text-blue-600 mt-1">
               Based on {selectedPersonas.length} personas × {questionCount} questions × ~45s per response
+              {enableAnalysis && ' + behavioral analysis'}
             </p>
           </div>
         )}

@@ -11,6 +11,7 @@ interface ExperimentRequest {
   personaIds: string[];
   questionnaireId: string;
   model?: string;
+  enableAnalysis?: boolean;
 }
 
 interface ExperimentResult {
@@ -93,7 +94,7 @@ async function loadQuestionnaire(id: string): Promise<Questionnaire | null> {
   }
 }
 
-async function testPersona(persona: Persona, questions: Question[], model: string = 'gpt-4o-mini'): Promise<ExperimentResult[]> {
+async function testPersona(persona: Persona, questions: Question[], model: string = 'gpt-5-mini'): Promise<ExperimentResult[]> {
   const results: ExperimentResult[] = [];
 
   // Test each question sequentially
@@ -148,7 +149,7 @@ Respond to questions from this persona's perspective. Be authentic to this role.
 
 export async function POST(request: NextRequest) {
   try {
-    const { personaIds, questionnaireId, model = 'gpt-4o-mini' }: ExperimentRequest = await request.json();
+    const { personaIds, questionnaireId, model = 'gpt-5-mini', enableAnalysis = false }: ExperimentRequest = await request.json();
 
     if (!personaIds || !personaIds.length || !questionnaireId) {
       return NextResponse.json(
@@ -220,6 +221,7 @@ export async function POST(request: NextRequest) {
         questionnaire: { id: questionnaire.id, name: questionnaire.name },
         questions: questionnaire.resolved_questions,
         model,
+        enableAnalysis,
         total_responses: allResults.length,
         successful_responses: allResults.filter((r) => !r.error).length,
         results: allResults

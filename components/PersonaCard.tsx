@@ -12,9 +12,10 @@ interface PersonaCardProps {
   };
   selected: boolean;
   onSelect: (id: string) => void;
+  disabled?: boolean;
 }
 
-export function PersonaCard({ persona, selected, onSelect }: PersonaCardProps) {
+export function PersonaCard({ persona, selected, onSelect, disabled = false }: PersonaCardProps) {
   // HACK: Simple badge mapping for validation - would need more sophisticated parsing in production
   const getBadgesFromProfile = (profile: string) => {
     const profileLower = profile.toLowerCase();
@@ -60,9 +61,10 @@ export function PersonaCard({ persona, selected, onSelect }: PersonaCardProps) {
     <Card
       className={cn(
         "cursor-pointer transition-all duration-200 hover:shadow-md",
-        selected && "ring-2 ring-green-500 border-green-500 shadow-lg"
+        selected && "ring-2 ring-green-500 border-green-500 shadow-lg",
+        disabled && "opacity-50 cursor-not-allowed"
       )}
-      onClick={() => onSelect(persona.id)}
+      onClick={disabled ? undefined : () => onSelect(persona.id)}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
