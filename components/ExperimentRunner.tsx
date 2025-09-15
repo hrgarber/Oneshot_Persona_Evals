@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { PersonaGrid } from './PersonaGrid';
-import { QuestionnairePreview } from './QuestionnairePreview';
+import { QuestionnaireGrid } from './QuestionnaireGrid';
 import ExperimentControls from './ExperimentControls';
 
 interface Persona {
@@ -144,7 +144,8 @@ export function ExperimentRunner() {
         body: JSON.stringify({
           personaIds: selectedPersonas,
           questionnaireId: selectedQuestionnaire,
-          model: config.model || 'gpt-4o-mini'
+          model: config.model || 'gpt-5-mini',
+          enableAnalysis: config.enableAnalysis || false
         })
       });
 
@@ -201,7 +202,7 @@ export function ExperimentRunner() {
           <CardDescription>Choose the questionnaire to use for analysis</CardDescription>
         </CardHeader>
         <CardContent>
-          <QuestionnairePreview
+          <QuestionnaireGrid
             questionnaires={questionnaires}
             selectedQuestionnaire={selectedQuestionnaire}
             onQuestionnaireSelect={setSelectedQuestionnaire}
