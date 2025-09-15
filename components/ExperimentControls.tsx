@@ -14,7 +14,7 @@ interface ExperimentConfig {
   model: string;
   temperature: number;
   max_tokens: number;
-  enable_analysis: boolean;
+  enableAnalysis: boolean;
 }
 
 interface ExperimentControlsProps {
@@ -63,7 +63,7 @@ export default function ExperimentControls({
       model,
       temperature,
       max_tokens: maxTokens,
-      enable_analysis: enableAnalysis
+      enableAnalysis: enableAnalysis
     };
 
     onRunExperiment(config);
