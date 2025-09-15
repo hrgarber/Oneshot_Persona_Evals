@@ -5,6 +5,11 @@
     }
   },
   "github": {
-    "autoDeployment": true
+    "enabled": true,
+    "autoDeployment": true,
+    "deploymentEnabled": {
+      "preview": true,
+      "production": true
+    }
   }
 }
