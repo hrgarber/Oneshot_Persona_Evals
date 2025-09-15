@@ -19,12 +19,13 @@ async function savePersonas(personas: any[]) {
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const body = await request.json();
   const personas = await loadPersonas();
 
-  const index = personas.findIndex((p: any) => p.id === params.id);
+  const index = personas.findIndex((p: any) => p.id === id);
   if (index === -1) {
     return NextResponse.json({ error: 'Persona not found' }, { status: 404 });
   }
@@ -37,10 +38,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const personas = await loadPersonas();
-  const filtered = personas.filter((p: any) => p.id !== params.id);
+  const filtered = personas.filter((p: any) => p.id !== id);
 
   await savePersonas(filtered);
 
