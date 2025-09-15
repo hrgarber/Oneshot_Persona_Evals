@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+// Removed broken Select component imports that caused nested select issues
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -102,16 +102,16 @@ export default function ExperimentControls({
         {/* Model Selection */}
         <div className="space-y-2">
           <Label htmlFor="model">Model</Label>
-          <Select value={model} onValueChange={setModel}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select model" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="gpt-5-mini">GPT-5 mini - Faster, cheaper ($0.25/$2.00 per 1M)</SelectItem>
-              <SelectItem value="gpt-5-nano">GPT-5 nano - Fastest, cheapest ($0.05/$0.40 per 1M)</SelectItem>
-              <SelectItem value="gpt-5">GPT-5 - Best for coding & agentic tasks ($1.25/$10.00 per 1M)</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            id="model"
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            className="flex h-10 w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="gpt-5-mini">GPT-5 mini - Faster, cheaper ($0.25/$2.00 per 1M)</option>
+            <option value="gpt-5-nano">GPT-5 nano - Fastest, cheapest ($0.05/$0.40 per 1M)</option>
+            <option value="gpt-5">GPT-5 - Best for coding & agentic tasks ($1.25/$10.00 per 1M)</option>
+          </select>
         </div>
 
         {/* Advanced Settings */}

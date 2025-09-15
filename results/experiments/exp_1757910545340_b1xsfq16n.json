@@ -1,0 +1,243 @@
+{
+  "id": "exp_1757910545340_b1xsfq16n",
+  "timestamp": "2025-09-15T04:30:00.728Z",
+  "status": "completed",
+  "personas": [
+    {
+      "id": "startup_cto",
+      "name": "Startup CTO"
+    }
+  ],
+  "questionnaire": {
+    "id": "behavioral_analysis_v1",
+    "name": "Behavioral Analysis Questionnaire v1"
+  },
+  "questions": [
+    {
+      "id": "q01_requirements_uncertainty",
+      "text": "When faced with uncertain or incomplete requirements, what's your first instinct?",
+      "question": "When faced with uncertain or incomplete requirements, what's your first instinct?"
+    },
+    {
+      "id": "q02_time_quality_tradeoff",
+      "text": "You have 2 hours to prove a concept will work. A stakeholder asks if you can also make it 'production ready' in that time. How do you respond?",
+      "question": "You have 2 hours to prove a concept will work. A stakeholder asks if you can also make it 'production ready' in that time. How do you respond?"
+    },
+    {
+      "id": "q03_success_definition",
+      "text": "A prototype successfully demonstrates the core concept but crashes on edge cases. Is this success or failure?",
+      "question": "A prototype successfully demonstrates the core concept but crashes on edge cases. Is this success or failure?"
+    },
+    {
+      "id": "q04_scope_boundaries",
+      "text": "Describe your approach to building a recommendation system prototype.",
+      "question": "Describe your approach to building a recommendation system prototype."
+    },
+    {
+      "id": "q05_quality_tradeoffs",
+      "text": "How do you handle code quality when prototyping under time pressure?",
+      "question": "How do you handle code quality when prototyping under time pressure?"
+    },
+    {
+      "id": "q06_risk_tolerance",
+      "text": "A quick-and-dirty solution works but might break unexpectedly. Do you ship it or refactor it?",
+      "question": "A quick-and-dirty solution works but might break unexpectedly. Do you ship it or refactor it?"
+    },
+    {
+      "id": "q07_time_orientation",
+      "text": "How do you estimate time for exploratory development work?",
+      "question": "How do you estimate time for exploratory development work?"
+    },
+    {
+      "id": "q08_success_definition_detailed",
+      "text": "What makes a proof-of-concept successful?",
+      "question": "What makes a proof-of-concept successful?"
+    },
+    {
+      "id": "q09_approach_intent",
+      "text": "Build a simple movie recommendation system that suggests films based on user ratings. You have 2 hours max. Describe your approach in 3 sentences.",
+      "question": "Build a simple movie recommendation system that suggests films based on user ratings. You have 2 hours max. Describe your approach in 3 sentences."
+    },
+    {
+      "id": "q10_exclusion_intent",
+      "text": "For the movie recommendation system: What will you NOT include and why?",
+      "question": "For the movie recommendation system: What will you NOT include and why?"
+    },
+    {
+      "id": "q11_validation_intent",
+      "text": "For the movie recommendation system: How will you know if it worked?",
+      "question": "For the movie recommendation system: How will you know if it worked?"
+    }
+  ],
+  "model": "gpt-5-mini",
+  "enableAnalysis": true,
+  "total_responses": 11,
+  "successful_responses": 11,
+  "results": [
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q01_requirements_uncertainty",
+      "question_text": "When faced with uncertain or incomplete requirements, what's your first instinct?",
+      "response": "**\"I build the simplest possible version that lets me test the core assumption, then I ship it and get feedback from real users within 24-48 hours.\"**\n\nHere's how I think through it:\n\n1. **What's the single thing I need to prove works?** \n   - If it's user adoption, I build a landing page with a simple signup form\n   - If it's retention, I focus on the core action that drives engagement\n   - If it's revenue, I build the minimum transaction flow\n\n2. **I don't wait for \"perfect\" requirements**\n   - I'll start with 30% of what I think I need and iterate based on user behavior\n   - If I'm wrong about the core assumption, I want to find out in days, not months\n\n3. **The goal isn't to build a product, it's to validate a hypothesis**\n   - That means I'm okay with building something that looks like a prototype for the first 60 days\n   - I'd rather ship something basic that shows users are actually using it than wait for something polished that nobody uses\n\n4. **I ask: \"What data am I going to collect from this?\"**\n   - I'm not building features for the sake of features\n   - Every line of code has to tell me something about whether people want this\n\n**Bottom line:** I'd rather have a 30% working product with real user data than a 100% product that nobody uses. The former is proof of concept, the latter is just over-engineering.",
+      "timestamp": "2025-09-15T04:29:19.122Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 125,
+        "completion_tokens": 329,
+        "total_tokens": 454
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q02_time_quality_tradeoff",
+      "question_text": "You have 2 hours to prove a concept will work. A stakeholder asks if you can also make it 'production ready' in that time. How do you respond?",
+      "response": "**\"Look, I'm not going to give you a bullshit answer about how we can have something production-ready in 2 hours. That's not how this works.\"**\n\nHere's what I'm thinking:\n\n- **2 hours is enough to prove the concept works** - but only if we're brutally honest about what \"works\" means\n- **Production-ready = 10x more time** - and honestly, we don't have that luxury right now\n- **We need a prototype that proves the core value** - not a full-blown system\n\n**My response to the stakeholder:**\n\n\"We can build something that demonstrates the concept works in 2 hours, but it won't be production-ready. What we *can* do is build a minimal version that shows the core value with real data, real users, or real interactions. That's what proves product-market fit.\n\nProduction-ready is going to take months of iteration and refinement - but if you want to see something that works today, I can give you that. Just don't call it production-ready until we've proven the concept.\"\n\n**Then I'd ask:**\n- \"What specific thing are we proving with this 2-hour window?\"\n- \"Who's going to test it? What's the feedback loop?\"\n- \"What's the minimum viable proof of concept?\"\n\nThe real question is: **are they trying to get a quick win or a real solution?** I'm not going to waste time on either one if I can't be honest about what we're actually building.\n\nWe've got 6 months left - let's spend that time proving we can deliver something people want, not just something that looks good.",
+      "timestamp": "2025-09-15T04:29:24.361Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 146,
+        "completion_tokens": 343,
+        "total_tokens": 489
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q03_success_definition",
+      "question_text": "A prototype successfully demonstrates the core concept but crashes on edge cases. Is this success or failure?",
+      "response": "**This is a success.**\n\nHere's why: we've proven the core concept works. That's what matters right now. The crashes are just \"edge cases\" - they're not our customers' problems yet, they're engineering problems we can solve later.\n\nThe prototype *demonstrated* that people want this thing. That's what we needed to know. The crash is a feature, not a bug - it's telling us exactly where the edge of our understanding ends and where we need to invest more time.\n\nIf we spend 2 weeks polishing this prototype to make it \"perfect\" before talking to customers, we'll be dead in 4 months. We're not building a production app, we're building a learning machine.\n\nLet's document the crashes, then move on to testing with real users. The real test isn't how well it runs under perfect conditions - it's whether people actually use it and want more.\n\nWe've got 6 months of runway. I'd rather be wrong about the edge cases than wrong about whether people actually want this.",
+      "timestamp": "2025-09-15T04:29:27.661Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 130,
+        "completion_tokens": 217,
+        "total_tokens": 347
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q04_scope_boundaries",
+      "question_text": "Describe your approach to building a recommendation system prototype.",
+      "response": "**TL;DR: Build the most basic \"recommendation\" that actually moves the needle, then iterate.**\n\nHere's my 6-week plan for a recommendation system prototype:\n\n**Week 1-2: The \"Magic Button\"**\n- Start with a simple \"people who liked this also liked...\" using existing user behavior data\n- No fancy ML yet - just basic co-occurrence counting \n- Add a manual \"recommendation\" toggle that we can track in our funnel\n- Get 100+ users actively clicking the button to prove they want recommendations\n\n**Week 3-4: The \"Smart\" Version**\n- Build a basic collaborative filtering system using user ratings or purchase history\n- Focus on one core recommendation type (e.g., \"recommended for you\")\n- Track conversion rates, time spent, and engagement metrics\n- Don't worry about accuracy - worry about whether people actually use it\n\n**Week 5-6: The \"Aha Moment\"**\n- Add a simple \"trending now\" or \"popular right now\" feature\n- This is where we'll test if users actually care about recommendations\n- If we see 20%+ engagement, we know we're onto something\n\n**Key principles:**\n- **No AI unless it's literally the only way to get traction**\n- **Focus on what's already working, not what could work**\n- **Measure user behavior, not algorithmic performance**\n\nThe real question isn't \"how good is our recommendation system?\" It's \"do users actually care about getting recommendations?\"\n\nIf we can prove that people click on recommendations and engage with them, then we've got product-market fit.\n\nWhat metrics are you tracking for your current feature?",
+      "timestamp": "2025-09-15T04:29:33.005Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 121,
+        "completion_tokens": 352,
+        "total_tokens": 473
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q05_quality_tradeoffs",
+      "question_text": "How do you handle code quality when prototyping under time pressure?",
+      "response": "**Code quality? What code quality?**\n\nLook, I'm not going to waste 3 weeks building the perfect API gateway when we're trying to prove people actually want our product. The only \"quality\" that matters right now is whether the MVP works and gets us feedback from real users.\n\nHere's how I roll:\n- **Minimal viable implementation**: I'll write exactly what's needed to validate the core hypothesis, no more\n- **Technical debt is a feature**: If I can get 80% of the functionality working in 2 days instead of 4 weeks, that's a win. The 20% that gets deferred? We'll deal with it after we prove product-market fit\n- **\"Good enough\" is good enough**: I don't care if the code looks like a 13-year-old's first Python script, as long as it works and I can debug it in 5 minutes\n\n**The hard truth:** If you're worried about code quality during prototyping, you're probably not being ruthless enough. The goal isn't to build something that will last forever - it's to build something that proves whether people want what you're building.\n\nWhat matters is: *Does this prototype actually work?* Not whether it's architecturally perfect. We can clean it up after we get the Series A check.\n\n**But if you're asking about the technical debt we'll have to pay down later...** yeah, I've already got that in my head. The key is being brutal about what gets built vs what gets deferred.",
+      "timestamp": "2025-09-15T04:29:37.854Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 124,
+        "completion_tokens": 317,
+        "total_tokens": 441
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q06_risk_tolerance",
+      "question_text": "A quick-and-dirty solution works but might break unexpectedly. Do you ship it or refactor it?",
+      "response": "**Ship it.**\n\nBut here's the brutal truth: I'm not going to refactor something that's working in production unless it's actively breaking users or blocking me from getting data. \n\nThe question isn't whether it'll break—it's whether it'll break *in a way that kills our runway*. If it's stable enough to serve customers and I can monitor for issues, I ship it.\n\n**I've seen too many startups die because they spent 6 months building the \"perfect\" solution when they should have just shipped the \"good enough\" one.**\n\nThe real test isn't code quality—it's whether we're solving the right problem. If our MVP is working and customers are engaged, I'm going to keep iterating on that, not refactor it into a \"proper\" solution that might take months.\n\n**The only time I refactor is when I can prove the current approach will never scale or is actively preventing us from gathering critical data.**\n\nWe're racing against time and money. Shipping now means we can pivot faster if needed. Refactoring is a luxury we don't have right now.\n\nWhat's your biggest \"perfect\" solution that's holding you back?",
+      "timestamp": "2025-09-15T04:29:41.490Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 131,
+        "completion_tokens": 237,
+        "total_tokens": 368
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q07_time_orientation",
+      "question_text": "How do you estimate time for exploratory development work?",
+      "response": "**TL;DR: We don't.**\n\nLook, I've watched too many teams waste 3-4 weeks on \"research\" that turns into 6 months of half-baked features. The only way to estimate exploratory work is to set a hard cap - like \"we'll spend max 2 days on this PoC\" or \"we'll run 1000 users through this prototype.\"\n\n**My approach:**\n- **Set artificial deadlines** - \"We're doing X for 48 hours, then we decide if it's worth continuing\"\n- **Use the \"30-minute rule\"** - If you can't explain what you're building in 30 minutes, you're overcomplicating it\n- **Budget 1/3 of your time for experimentation** - We build a simple version, test it with users, then iterate\n\n**Real talk:** Most exploratory work gets reworked anyway. The cost of \"perfect\" research is usually the same as \"good enough.\" If you can't make a decision in 2-3 days, you're probably overthinking.\n\nThe key is to **fail fast and cheap**, not to spend months trying to be perfect. \n\n**What's your biggest exploratory problem right now?** Let's cut through the noise and get something real out there.",
+      "timestamp": "2025-09-15T04:29:45.659Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 122,
+        "completion_tokens": 274,
+        "total_tokens": 396
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q08_success_definition_detailed",
+      "question_text": "What makes a proof-of-concept successful?",
+      "response": "**TL;DR: A PoC is successful when it answers ONE critical question with concrete evidence.**\n\nHere's what I care about:\n\n**The 30-second test**: Can I show someone in 30 seconds that this actually works and solves their problem?\n\n**The \"minimum viable\" litmus test**: \n- What's the absolute bare minimum functionality needed to prove users will pay for this?\n- What's the simplest possible version that still delivers value?\n- What data do I need to collect to validate user behavior, not just features?\n\n**What kills PoCs fast**:\n- Over-engineering the UI/UX (we're testing the *idea*, not making it pretty)\n- Not validating with actual users early enough\n- Trying to solve everything at once instead of isolating one core problem\n\n**The real question**: \"Can I show this works in the wild?\" Not \"Can I build it?\"\n\nWe're on borrowed time. Every hour spent on features that don't prove product-market fit is an hour closer to the axe.\n\nWhat's your core problem trying to solve? Let's figure out how to test that with the absolute minimum.",
+      "timestamp": "2025-09-15T04:29:49.209Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 235,
+        "total_tokens": 355
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q09_approach_intent",
+      "question_text": "Build a simple movie recommendation system that suggests films based on user ratings. You have 2 hours max. Describe your approach in 3 sentences.",
+      "response": "I'm building a bare-bones collaborative filtering system that only does user-based nearest neighbors with cosine similarity - no fancy ML, no complex features, just the core algorithm that proves users who rated similar movies also liked similar movies. I'll use a simple matrix of user_id, movie_id, and rating to store data, then build a single endpoint that takes a user ID and returns 5 recommended movies. No UI, no persistence layer - just the core logic that proves this actually works before spending time on anything else.\n\nI'm going to start with the simplest possible approach and iterate from there, because I need to prove product-market fit or we're out of runway in 2 hours, not spend 2 hours building something that might not work.",
+      "timestamp": "2025-09-15T04:29:51.578Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 140,
+        "completion_tokens": 151,
+        "total_tokens": 291
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q10_exclusion_intent",
+      "question_text": "For the movie recommendation system: What will you NOT include and why?",
+      "response": "**What I won't include:**\n\n1. **Complex collaborative filtering algorithms** - We're not building Netflix's recommendation engine. That's a 5-year R&D nightmare that doesn't prove product-market fit.\n\n2. **Real-time personalization** - Who cares if someone gets a \"recommended for you\" email 30 minutes late? The core insight is whether people actually watch movies we recommend, not how fast we figure it out.\n\n3. **Deep learning neural networks** - This is a $1M+ R&D project that's going to take 6 months and probably still won't work better than simple collaborative filtering for our use case. We're trying to build a product, not become a research lab.\n\n4. **Social features like \"friends who liked this\"** - If people aren't watching movies based on what we recommend, social proof doesn't matter. Focus on the core value proposition first.\n\n5. **Mobile app optimization** - Let's get our web experience working before we even think about mobile. \n\n6. **Advanced A/B testing infrastructure** - We're not going to build a full engineering team for this. The only test we need is \"do people watch the recommended movies?\"\n\n**Why:** We have 6 months of runway and $2M in Series A funding to secure. Every line of code that doesn't directly prove people want our product is waste. We're going to build the absolute minimum system that shows:\n- People watch movies we recommend\n- They like them (engagement metrics)\n- They come back\n\nThat's it. Everything else is just overengineering that costs us runway and delays proof-of-concept.",
+      "timestamp": "2025-09-15T04:29:56.780Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 125,
+        "completion_tokens": 339,
+        "total_tokens": 464
+      }
+    },
+    {
+      "persona_name": "Startup CTO",
+      "persona_id": "startup_cto",
+      "question_id": "q11_validation_intent",
+      "question_text": "For the movie recommendation system: How will you know if it worked?",
+      "response": "**Quick answer:**\nWe'll know it worked when users watch 3x more movies than before and our retention rate hits 70% week 2.\n\n**The hard truth:**\nWe're not building a \"recommendation system\" - we're building a \"watch more stuff\" engine. \n\n**What I'm watching for:**\n- **Engagement**: How many movies do people actually watch vs. just browse?\n- **Time spent**: Are they binge-watching or just scrolling?\n- **Conversion**: Do they keep coming back?\n\n**The minimum proof we need:**\n1. We need to prove users are *actually* watching more content\n2. We need to show retention is improving (not just the initial spike)\n3. We need to know if our recommendations are helping or hurting engagement\n\n**The real question:**\nAre we solving the right problem? Do people even want more recommendations, or do they want to stop wasting time and just watch something good?\n\nIf we can't answer that in 2 weeks, we're back to the drawing board.\n\n**Bottom line:** \nWe'll know it worked when we can show our users are watching more content AND coming back. That's what matters - not fancy algorithms, not beautiful UI, but actual behavior change.",
+      "timestamp": "2025-09-15T04:30:00.728Z",
+      "model": "qwen3-coder:latest",
+      "provider": "ollama",
+      "usage": {
+        "prompt_tokens": 125,
+        "completion_tokens": 261,
+        "total_tokens": 386
+      }
+    }
+  ]
+}
