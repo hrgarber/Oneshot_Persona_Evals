@@ -1,196 +1,36 @@
-# Persona Evaluation Research Tool
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A comprehensive research tool for studying behavioral differences between AI coding assistant personas, featuring both command-line batch processing and a web-based interface for interactive experimentation.
+## Getting Started
 
-## Overview
-
-This tool tests 6 different professional personas (startup CTO, PhD student, consulting analyst, ML engineer, data scientist, product engineer) against behavioral questions to understand how different professional contexts influence AI responses.
-
-## Features
-
-- **Web Interface**: Interactive GUI for managing personas, questionnaires, and experiments
-- **Batch Processing**: Command-line tool for running complete experiments
-- **CRUD Operations**: Full create, read, update, delete functionality for all entities
-- **API Key Management**: Support for both Ollama (local) and OpenAI models
-- **Real-time Results**: Live experiment monitoring and results display
-- **Clean Server Management**: Proper startup/shutdown lifecycle with signal handling
-
-## Quick Start
-
-### Web Interface (Recommended)
+First, run the development server:
 
 ```bash
-# Install dependencies
-uv sync
-
-# Start the web interface
-uv run python app.py
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-Access the interface at: http://localhost:9000
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The server includes:
-- Clean startup/shutdown with signal handling (SIGINT, SIGTERM)
-- Automatic port conflict resolution
-- Background process management
-- Real-time logging to server.log
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### Command Line Usage
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-# Ensure Ollama is running with qwen3-coder model (optional)
-ollama pull qwen3-coder
-ollama serve
+## Learn More
 
-# Run complete experiment with all personas and questions
-uv run python main.py
-```
+To learn more about Next.js, take a look at the following resources:
 
-## Web Interface Features
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-The web interface provides:
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-- **Persona Management**: Create, edit, and delete persona profiles
-- **Questionnaire Builder**: Design custom questionnaires with multiple questions
-- **Question Library**: Manage individual questions and reuse across questionnaires
-- **Experiment Runner**: Execute experiments with real-time progress monitoring
-- **Results Viewer**: Browse and analyze experiment results
-- **API Configuration**: Set up OpenAI or Ollama model endpoints
-- **Environment Management**: Edit .env files directly through the interface
+## Deploy on Vercel
 
-**Processing Approach:**
-- One persona at a time for mental continuity
-- All questions per persona run concurrently for efficiency
-- Results saved as individual session files per persona
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## Folder Structure
-
-### `/framework/`
-Core research design and methodology
-- `persona_questionnaire.md` - Questions to test each persona
-- `candidate_personas.md` - Personas selected for testing
-- `research_outcomes_framework.md` - How to extract value from results
-- `test_approach_analysis.md` - Technical approach analysis
-- `original_conversation.md` - Original conversation that inspired this experiment
-
-### `/test_data/`
-Test inputs - individual persona and question files
-- `startup_cto.md`, `phd_student.md`, `consulting_analyst.md`, etc. - Individual persona definitions
-- `questions.md` - Complete 11-question behavioral questionnaire
-
-### `/results/`
-Raw outputs from persona testing (generated during tests)
-- `raw_responses/` - Individual JSON session files per persona
-
-### Root Files
-- `persona_harness.py` - Core async testing harness with concurrency control
-- `main.py` - Sequential persona test runner (entry point)
-- `pyproject.toml` - UV project configuration
-
-## Results
-
-Each persona generates a session file containing:
-- All 11 question responses
-- Timestamps and model information
-- Success/failure counts
-- Individual response metadata
-
-Files named: `{persona_name}_session_{timestamp}.json`
-
-## Procedural Narrative: How This Repository Came to Be
-
-This repository represents a systematic exploration into AI persona behavioral differences, born from a practical frustration with AI coding assistants that consistently over-engineered solutions when rapid prototyping was needed.
-
-### The Problem Discovery
-
-The journey began with a user working in data science who found Claude Code's default "enterprise readiness" approach fundamentally misaligned with their needs for quick proof-of-concept development. While Claude Code excelled at production-ready solutions, it struggled with the "good enough" mindset required for research and rapid experimentation.
-
-### Research Framework Development
-
-Through extensive conversation and iteration, we developed a comprehensive research framework to study this phenomenon:
-
-1. **Identified the Core Issue**: Different stakeholder perspectives on what constitutes "done"
-   - Researcher: Hypothesis validated
-   - Engineer: Deployment ready
-   - Product Manager: User value demonstrated
-   - Business: ROI demonstrated
-
-2. **Designed Behavioral Dimensions**: Five key areas where personas might differ
-   - Scope boundaries (minimal vs comprehensive)
-   - Quality trade-offs (speed vs robustness)
-   - Risk tolerance (ship broken vs perfect)
-   - Time orientation (sprint vs marathon)
-   - Success definition (hypothesis vs deployment)
-
-3. **Created Systematic Testing Approach**: 11-question behavioral questionnaire covering:
-   - Foundational approach questions (3)
-   - Behavioral diagnostic questions (5)
-   - Intent vs implementation questions (3)
-
-### Technical Implementation
-
-The implementation evolved through several iterations:
-
-**Phase 1: Basic Sequential Testing**
-- Simple harness with synchronous OpenAI SDK
-- Individual question files, hardcoded personas
-- Sequential processing (slow, but working)
-
-**Phase 2: Concurrent Optimization**
-- Switched to AsyncOpenAI for performance
-- Attempted full concurrency (66 simultaneous requests)
-- Hit timeout issues with local Ollama models
-
-**Phase 3: Smart Batching**
-- Implemented controlled concurrency (3 requests at a time)
-- Better error handling and progress tracking
-- Still mixed personas and questions together
-
-**Phase 4: Mental Continuity Focus**
-- **Key insight**: Process one persona at a time for consistent thinking
-- Each persona answers all 11 questions concurrently
-- Maintains persona mental state while optimizing efficiency
-- Perfect balance of performance and response quality
-
-### Persona Selection and Testing
-
-We carefully selected 6 personas representing different professional contexts that regularly make trade-offs under constraints:
-
-- **Startup CTO**: Extreme time pressure, runway concerns
-- **PhD Research Student**: Hypothesis-driven, experimental mindset
-- **Consulting Analyst**: Client-focused, deadline-driven
-- **ML Engineer**: Model-focused, iterative development
-- **Data Scientist**: Analysis-driven, messy exploration comfortable
-- **Product Engineer**: Growth-focused, strategic shortcuts
-
-Each persona was tested against the complete 11-question behavioral questionnaire using the qwen3-coder model through Ollama.
-
-### Analysis and Validation
-
-Using parallel agent analysis, we discovered:
-
-**Clear Behavioral Spectrum**: Personas arranged perfectly from execution-first (1.2/5) to research-first (4.8/5), confirming our hypothesis that professional context fundamentally shapes technical decision-making.
-
-**Consistent Language Patterns**: Each persona developed distinct vocabulary, decision frameworks, and activation/deactivation words that can be used for targeted prompting.
-
-**Hypothesis Validation**: All personas performed as expected, with some showing even more sophistication than anticipated in their reasoning and meta-cognitive awareness.
-
-### Practical Applications
-
-This research provides a foundation for:
-
-1. **Targeted AI Prompting**: Know which persona to activate for different types of work
-2. **Language Optimization**: Use specific words and phrases that trigger desired behaviors
-3. **Context Investment Guidelines**: Understand when rich persona backstories add value
-4. **Prompt Engineering Playbook**: Systematic approach to persona selection and activation
-
-### Methodological Insights
-
-The experiment revealed several important principles:
-
-- **Persona consistency matters more than speed**: Sequential processing per persona yields better behavioral coherence
-- **Professional context is a powerful behavioral modifier**: More effective than explicit constraints alone
-- **Mental continuity**: Processing all questions for one persona together maintains consistent reasoning patterns
-- **Observable behaviors reveal embedded assumptions**: What personas do matters more than what they say they'll do
-
-This repository demonstrates that AI persona research can be both systematic and practically applicable, providing concrete tools for improving human-AI collaboration in technical contexts.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
