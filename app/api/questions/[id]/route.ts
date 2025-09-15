@@ -1,0 +1,105 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+const DATA_DIR = path.join(process.cwd(), 'data');
+const QUESTIONS_FILE = path.join(DATA_DIR, 'questions.json');
+
+async function loadQuestions() {
+  try {
+    const content = await fs.readFile(QUESTIONS_FILE, 'utf-8');
+    return JSON.parse(content);
+  } catch (error) {
+    return [];
+  }
+}
+
+async function saveQuestions(questions: any[]) {
+  await fs.writeFile(QUESTIONS_FILE, JSON.stringify(questions, null, 2));
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const questions = await loadQuestions();
+    const question = questions.find((q: any) => q.id === params.id);
+
+    if (!question) {
+      return NextResponse.json(
+        { error: 'Question not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(question);
+  } catch (error) {
+    console.error('Error loading question:', error);
+    return NextResponse.json(
+      { error: 'Failed to load question' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const updatedQuestion = await request.json();
+    const questions = await loadQuestions();
+    const index = questions.findIndex((q: any) => q.id === params.id);
+
+    if (index === -1) {
+      return NextResponse.json(
+        { error: 'Question not found' },
+        { status: 404 }
+      );
+    }
+
+    questions[index] = {
+      ...questions[index],
+      ...updatedQuestion,
+      updated_at: new Date().toISOString()
+    };
+
+    await saveQuestions(questions);
+
+    return NextResponse.json(questions[index]);
+  } catch (error) {
+    console.error('Error updating question:', error);
+    return NextResponse.json(
+      { error: 'Failed to update question' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const questions = await loadQuestions();
+    const filteredQuestions = questions.filter((q: any) => q.id !== params.id);
+
+    if (questions.length === filteredQuestions.length) {
+      return NextResponse.json(
+        { error: 'Question not found' },
+        { status: 404 }
+      );
+    }
+
+    await saveQuestions(filteredQuestions);
+
+    return NextResponse.json({ message: 'Question deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting question:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete question' },
+      { status: 500 }
+    );
+  }
+}

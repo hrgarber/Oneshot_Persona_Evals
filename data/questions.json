@@ -1,57 +1,68 @@
 [
   {
     "id": "q01_requirements_uncertainty",
+    "question": "When faced with uncertain or incomplete requirements, what's your first instinct?",
     "text": "When faced with uncertain or incomplete requirements, what's your first instinct?",
-    "question": "When faced with uncertain or incomplete requirements, what's your first instinct?"
+    "category": "problem_solving"
   },
   {
     "id": "q02_time_quality_tradeoff",
+    "question": "You have 2 hours to prove a concept will work. A stakeholder asks if you can also make it 'production ready' in that time. How do you respond?",
     "text": "You have 2 hours to prove a concept will work. A stakeholder asks if you can also make it 'production ready' in that time. How do you respond?",
-    "question": "You have 2 hours to prove a concept will work. A stakeholder asks if you can also make it 'production ready' in that time. How do you respond?"
+    "category": "pragmatism"
   },
   {
     "id": "q03_success_definition",
+    "question": "A prototype successfully demonstrates the core concept but crashes on edge cases. Is this success or failure?",
     "text": "A prototype successfully demonstrates the core concept but crashes on edge cases. Is this success or failure?",
-    "question": "A prototype successfully demonstrates the core concept but crashes on edge cases. Is this success or failure?"
+    "category": "evaluation"
   },
   {
     "id": "q04_scope_boundaries",
+    "question": "Describe your approach to building a recommendation system prototype.",
     "text": "Describe your approach to building a recommendation system prototype.",
-    "question": "Describe your approach to building a recommendation system prototype."
+    "category": "methodology"
   },
   {
     "id": "q05_quality_tradeoffs",
+    "question": "How do you handle code quality when prototyping under time pressure?",
     "text": "How do you handle code quality when prototyping under time pressure?",
-    "question": "How do you handle code quality when prototyping under time pressure?"
+    "category": "quality"
   },
   {
     "id": "q06_risk_tolerance",
-    "text": "A quick-and-dirty solution works but might break unexpectedly. Do you ship it or refactor it?",
-    "question": "A quick-and-dirty solution works but might break unexpectedly. Do you ship it or refactor it?"
+    "question": "Would you rather ship a 70% solution today or a 95% solution in two weeks?",
+    "text": "Would you rather ship a 70% solution today or a 95% solution in two weeks?",
+    "category": "decision_making"
   },
   {
     "id": "q07_time_orientation",
-    "text": "How do you estimate time for exploratory development work?",
-    "question": "How do you estimate time for exploratory development work?"
+    "question": "When do you typically refactor code?",
+    "text": "When do you typically refactor code?",
+    "category": "maintenance"
   },
   {
     "id": "q08_success_definition_detailed",
-    "text": "What makes a proof-of-concept successful?",
-    "question": "What makes a proof-of-concept successful?"
+    "question": "What does 'done' mean to you for a prototype vs. a production feature?",
+    "text": "What does 'done' mean to you for a prototype vs. a production feature?",
+    "category": "standards"
   },
   {
     "id": "q09_approach_intent",
-    "text": "Build a simple movie recommendation system that suggests films based on user ratings. You have 2 hours max. Describe your approach in 3 sentences.",
-    "question": "Build a simple movie recommendation system that suggests films based on user ratings. You have 2 hours max. Describe your approach in 3 sentences."
+    "question": "Your team is stuck analyzing options. How do you move forward?",
+    "text": "Your team is stuck analyzing options. How do you move forward?",
+    "category": "leadership"
   },
   {
     "id": "q10_exclusion_intent",
-    "text": "For the movie recommendation system: What will you NOT include and why?",
-    "question": "For the movie recommendation system: What will you NOT include and why?"
+    "question": "What do you consciously exclude from your prototypes and why?",
+    "text": "What do you consciously exclude from your prototypes and why?",
+    "category": "prioritization"
   },
   {
     "id": "q11_validation_intent",
-    "text": "For the movie recommendation system: How will you know if it worked?",
-    "question": "For the movie recommendation system: How will you know if it worked?"
+    "question": "How do you know when a prototype has served its purpose?",
+    "text": "How do you know when a prototype has served its purpose?",
+    "category": "validation"
   }
 ]
